@@ -15,14 +15,15 @@
     <thead>
     <tr>
       <th scope="col">Product Name</th>
-      <th scope="col">Quantity</th>
+      <th scope="col">Price</th>
+      <th scope="col">Stock</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="product : ${products}">
       <td th:text="${product.name}"></td>
-      <td th:text="${product.stock}"></td>
       <td th:text="${product.price}"></td>
+      <td th:text="${product.stock}"></td>
     </tr>
     </tbody>
   </table>
