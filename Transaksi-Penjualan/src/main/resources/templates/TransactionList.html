@@ -27,7 +27,7 @@
             <td th:text="${transaction.transactionId}"></td>
             <td th:text="${#dates.format(transaction.date, 'yyyy-MM-dd HH:mm')}"></td>
             <td th:text="${transaction.totalAmount}"></td>
-            <td th:text="${transaction.status ? 'Finished' : 'Pending'}"></td>
+            <td th:text="${transaction.status}"></td>
             <td>
                 <div class="d-flex">
                     <a th:href="@{/transaction/edit/{id}(id=${transaction.transactionId})}" class="btn btn-warning btn-sm me-2">Edit</a>

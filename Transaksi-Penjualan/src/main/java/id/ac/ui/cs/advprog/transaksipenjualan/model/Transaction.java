@@ -10,5 +10,5 @@ public class Transaction {
     private String transactionId;
     private Date date;
     private int totalAmount;
-    private boolean status;
+    private String status;
 }

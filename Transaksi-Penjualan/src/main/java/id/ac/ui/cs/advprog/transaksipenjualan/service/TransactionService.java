@@ -7,5 +7,4 @@ public interface TransactionService {
     public Transaction create(Transaction transaction);
     public List<Transaction> findAll();
     public Transaction getTransactionDetails(String transactionId);
-
 }

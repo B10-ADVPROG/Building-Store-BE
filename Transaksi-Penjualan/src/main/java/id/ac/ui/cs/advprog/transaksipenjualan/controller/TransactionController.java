@@ -31,7 +31,7 @@ public class TransactionController {
     @GetMapping("/list")
     public String transactionListPage(Model model) {
         List<Transaction> allTransaction = service.findAll();
-        model.addAttribute("transaction", allTransaction);
+        model.addAttribute("transactions", allTransaction);
         return "TransactionList";
     }
 }

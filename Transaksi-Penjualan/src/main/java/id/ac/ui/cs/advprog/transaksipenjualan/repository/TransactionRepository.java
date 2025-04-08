@@ -4,6 +4,7 @@ import id.ac.ui.cs.advprog.transaksipenjualan.model.Transaction;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class TransactionRepository {
 
     public Transaction create(Transaction transaction) {
         transaction.setTransactionId(java.util.UUID.randomUUID().toString());
+        transaction.setDate(new Date());
         transactionData.add(transaction);
         return transaction;
     }
