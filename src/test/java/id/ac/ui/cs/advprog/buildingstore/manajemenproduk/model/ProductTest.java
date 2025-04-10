@@ -147,7 +147,7 @@ public class ProductTest {
     }
 
     @Test
-    void testBuilderOptionalParameters() {
+    void testBuilderOptionalFields() {
         assertThrows(IllegalStateException.class, () -> {
             Product productWithBuilder = new Product.Builder()
                     .productDescription("Semen berkualitas tinggi untuk konstruksi bangunan")

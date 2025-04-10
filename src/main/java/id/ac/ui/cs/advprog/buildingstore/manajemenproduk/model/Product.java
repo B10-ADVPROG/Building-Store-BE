@@ -18,11 +18,11 @@ public class Product {
     }
 
     public Product(Builder builder) {
-        this.productId = builder.productId;
-        this.productName = builder.productName;
-        this.productDescription = builder.productDescription;
-        this.productPrice = builder.productPrice;
-        this.productStock = builder.productStock;
+        setProductId(builder.productId);
+        setProductName(builder.productName);
+        setProductDescription(builder.productDescription);
+        setProductPrice(builder.productPrice);
+        setProductStock(builder.productStock);
     }
 
     public void setProductId(String productId) {
@@ -46,8 +46,6 @@ public class Product {
     public void setProductDescription(String productDescription) {
         if (productDescription == null) {
             throw new IllegalArgumentException("Product description cannot be null");
-        } else if (productDescription.isEmpty()) {
-            throw new IllegalArgumentException("Product description cannot be empty");
         }
         this.productDescription = productDescription;
     }
@@ -73,6 +71,9 @@ public class Product {
         private int productPrice;
         private int productStock;
 
+        private boolean nameRequired = true;
+        private boolean priceRequired = true;
+
         public Builder() {  // Set the product id automatically and set default value for optional field
             this.productId = UUID.randomUUID().toString();
             this.productDescription = "";
@@ -81,6 +82,7 @@ public class Product {
 
         public Builder productName(String productName) {
             this.productName = productName;
+            nameRequired = false;
             return this;
         }
 
@@ -91,6 +93,7 @@ public class Product {
 
         public Builder productPrice(int productPrice) {
             this.productPrice = productPrice;
+            priceRequired = false;
             return this;
         }
 
@@ -100,6 +103,10 @@ public class Product {
         }
 
         public Product build() {
+            if (nameRequired || priceRequired) {
+                throw new IllegalStateException();
+            }
+
             return new Product(this);
         }
     }
