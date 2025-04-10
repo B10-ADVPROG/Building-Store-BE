@@ -1,11 +1,9 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemenproduk.repository;
 
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model.Product;
-import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -58,6 +56,17 @@ public class ProductRepositoryTest {
         assertEquals("Laptop dengan GPU GeForce RTX 4090, RAM 32 GB, SSD 2TB", readProduct.getProductDescription());
         assertEquals(30000000, readProduct.getProductPrice());
         assertEquals(10, readProduct.getProductStock());
+    }
+
+    @Test
+    void testFindProductById() {
+        productRepository.create(product1);
+
+        Product targetProduct = productRepository.findById(product1.getProductId());
+        assertEquals(targetProduct.getProductName(), product1.getProductName());
+        assertEquals(targetProduct.getProductDescription(), product1.getProductDescription());
+        assertEquals(targetProduct.getProductPrice(), product1.getProductPrice());
+        assertEquals(targetProduct.getProductStock(), product1.getProductStock());
     }
 
     @Test
