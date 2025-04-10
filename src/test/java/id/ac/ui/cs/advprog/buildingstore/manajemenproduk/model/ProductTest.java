@@ -1,6 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model;
 
-import id.ac.ui.cs.advprog.buildingstore.transaksipenjualan.model.Product;
+import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model.Product;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
