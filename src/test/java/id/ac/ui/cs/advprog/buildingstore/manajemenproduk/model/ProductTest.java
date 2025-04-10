@@ -98,4 +98,94 @@ public class ProductTest {
         }, "Product stock cannot be negative");
     }
 
+    @Test
+    void testBuilderWithInvalidParameters() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            Product productWithBuilder = new Product.Builder()
+                    .productName(null)
+                    .productDescription("Semen berkualitas tinggi untuk konstruksi bangunan")
+                    .productPrice(80000)
+                    .productStock(100)
+                    .build();
+        }, "Product name cannot be null");
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Product productWithBuilder = new Product.Builder()
+                    .productName("")
+                    .productDescription("Semen berkualitas tinggi untuk konstruksi bangunan")
+                    .productPrice(80000)
+                    .productStock(100)
+                    .build();
+        }, "Product name cannot be empty");
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Product productWithBuilder = new Product.Builder()
+                    .productName("Semen Tiga Roda 50 kg")
+                    .productDescription(null)
+                    .productPrice(80000)
+                    .productStock(100)
+                    .build();
+        }, "Product name cannot be null");
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Product productWithBuilder = new Product.Builder()
+                    .productName("Semen Tiga Roda 50 kg")
+                    .productDescription("Semen berkualitas tinggi untuk konstruksi bangunan")
+                    .productPrice(-800000)
+                    .productStock(100)
+                    .build();
+        }, "Product price cannot be negative");
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            Product productWithBuilder = new Product.Builder()
+                    .productName("Semen Tiga Roda 50 kg")
+                    .productDescription("Semen berkualitas tinggi untuk konstruksi bangunan")
+                    .productPrice(80000)
+                    .productStock(-100)
+                    .build();
+        }, "Product stock cannot be negative");
+    }
+
+    @Test
+    void testBuilderOptionalParameters() {
+        assertThrows(IllegalStateException.class, () -> {
+            Product productWithBuilder = new Product.Builder()
+                    .productDescription("Semen berkualitas tinggi untuk konstruksi bangunan")
+                    .productPrice(80000)
+                    .productStock(100)
+                    .build();
+        });
+
+        assertDoesNotThrow(() -> {
+            Product productWithBuilder = new Product.Builder()
+                    .productName("Semen Tiga Roda 50 kg")
+                    .productPrice(80000)
+                    .productStock(100)
+                    .build();
+        });
+
+        assertThrows(IllegalStateException.class, () -> {
+            Product productWithBuilder = new Product.Builder()
+                    .productName("Semen Tiga Roda 50 kg")
+                    .productDescription("Semen berkualitas tinggi untuk konstruksi bangunan")
+                    .productStock(100)
+                    .build();
+        });
+
+        assertDoesNotThrow(() -> {
+            Product productWithBuilder = new Product.Builder()
+                    .productName("Semen Tiga Roda 50 kg")
+                    .productDescription("Semen berkualitas tinggi untuk konstruksi bangunan")
+                    .productPrice(80000)
+                    .build();
+        });
+
+        assertDoesNotThrow(() -> {
+            Product productWithBuilder = new Product.Builder()
+                    .productName("Semen Tiga Roda 50 kg")
+                    .productPrice(80000)
+                    .build();
+        });
+    }
+
 }
