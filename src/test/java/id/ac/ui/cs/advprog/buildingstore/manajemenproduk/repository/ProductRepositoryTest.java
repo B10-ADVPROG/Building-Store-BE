@@ -34,6 +34,9 @@ public class ProductRepositoryTest {
         product2.setProductStock(50);
     }
 
+
+    // ================ HAPPY PATH TESTS ================ //
+
     @Test
     void testCreateProduct() {
         productRepository.create(product1);
@@ -94,12 +97,53 @@ public class ProductRepositoryTest {
         productRepository.create(product1);
 
         productRepository.delete(product1.getProductId());
-        List<Product> products = productRepository.getProducts();
-        Iterator<Product> productIterator = products.iterator();
+        Iterator<Product> productIterator = productRepository.findAll();
 
-        assertTrue(products.isEmpty());
         assertFalse(productIterator.hasNext());
     }
+
+
+    // ================ UNHAPPY PATH TESTS ================ //
+
+    @Test
+    void testFindNonExistingProduct() {
+        productRepository.create(product1);
+
+        Product targetProduct = productRepository.findById("non-existent-id");
+        assertNull(targetProduct);
+    }
+
+    @Test
+    void testUpdateNonExistingProduct() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.update("non-existent-id", product2);
+        }, "Cannot update when trying to update non-existent product");
+    }
+
+    @Test
+    void testUpdateWithNull() {
+        productRepository.create(product1);
+        assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.update(product1.getProductId(), null);
+        }, "Cannot update when updated product is null");
+    }
+
+    @Test
+    void testCreateProductWithNull() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.create(null);
+        }, "Cannot create null product");
+    }
+
+    @Test
+    void testDeleteNonExistingProduct() {
+        productRepository.create(product1);
+        assertDoesNotThrow(() -> {
+            productRepository.delete("non-existent-id");
+        });
+    }
+
+
 
 
 }

@@ -20,6 +20,9 @@ public class ProductTest {
         product.setProductStock(100);
     }
 
+
+    // ================ HAPPY PATH TESTS ================ //
+
     @Test
     void testGetProduct() {
         assertEquals("960c03bc-9e06-41c7-aa50-cb582cee3e27", product.getProductId());
@@ -52,7 +55,48 @@ public class ProductTest {
     }
 
 
+    // ================ UNHAPPY PATH TESTS ================ //
 
+    @Test
+    void testSetNullProductId() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            product.setProductId(null);
+        }, "Product id cannot be null");
+    }
 
+    @Test
+    void testSetNullProductName() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            product.setProductName(null);
+        }, "Product name cannot be null");
+    }
+
+    @Test
+    void testSetEmptyProductName() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            product.setProductName("");
+        }, "Product name cannot be empty");
+    }
+
+    @Test
+    void testSetNullProductDescription() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            product.setProductDescription(null);
+        }, "Product description cannot be null");
+    }
+
+    @Test
+    void testSetNegativeProductPrice() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            product.setProductPrice(-400000);
+        }, "Product price cannot be negative");
+    }
+
+    @Test
+    void testSetNegativeProductStock() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            product.setProductStock(-5);
+        }, "Product stock cannot be negative");
+    }
 
 }
