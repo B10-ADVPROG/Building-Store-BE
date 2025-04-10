@@ -11,10 +11,6 @@ import java.util.List;
 public class ProductRepository {
     private List<Product> products = new ArrayList<>();
 
-    public List<Product> getProducts() {
-        return products;
-    }
-
     public Product create(Product product) {
         products.add(product);
         return product;
