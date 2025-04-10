@@ -41,6 +41,9 @@ public class ProductServiceTest {
         product2.setProductStock(50);
     }
 
+
+    // ================ HAPPY PATH TESTS ================ //
+
     @Test
     void testCreateProduct() {
         service.create(product1);
@@ -96,7 +99,6 @@ public class ProductServiceTest {
         assertEquals(50, targetProduct.getProductStock());
     }
 
-
     @Test
     void testDeleteProduct() {
         service.create(product1);
@@ -106,5 +108,27 @@ public class ProductServiceTest {
         assertTrue(allProduct.isEmpty());
     }
 
+    // ================ UNHAPPY PATH TESTS ================ //
+
+    @Test
+    void testCreateNullProduct() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.create(null);
+        }, "Cannot create null product");
+    }
+
+    @Test
+    void testFindNonExistingProduct() {
+        Product targetProduct = service.findById("non-existent-id");
+        assertNull(targetProduct);
+    }
+
+    @Test
+    void testUpdateNullProduct() {
+        service.create(product1);
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.update(product1.getProductId(), null);
+        }, "Cannot update with null product");
+    }
 
 }
