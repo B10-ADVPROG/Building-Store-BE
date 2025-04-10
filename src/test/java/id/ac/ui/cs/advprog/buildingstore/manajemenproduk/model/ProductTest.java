@@ -25,17 +25,12 @@ public class ProductTest {
 
     @Test
     void testGetProduct() {
-        String productId = product.getProductId();
-        String productName = product.getProductName();
-        String productDescription = product.getProductDescription();
-        int productPrice = product.getProductPrice();
-        int productStock = product.getProductStock();
+        assertEquals("960c03bc-9e06-41c7-aa50-cb582cee3e27", product.getProductId());
+        assertEquals("Laptop Gaming ASUS ROG", product.getProductName());
+        assertEquals("Laptop dengan GPU GeForce RTX 4090, RAM 32 GB, SSD 2TB", product.getProductDescription());
+        assertEquals(30000000, product.getProductPrice());
+        assertEquals(10, product.getProductStock());
 
-        assertEquals(productId, "960c03bc-9e06-41c7-aa50-cb582cee3e27");
-        assertEquals(productName, "Laptop Gaming ASUS ROG");
-        assertEquals(productDescription, "Laptop dengan GPU GeForce RTX 4090, RAM 32 GB, SSD 2TB");
-        assertEquals(productPrice, 30000000);
-        assertEquals(productStock, 10);
     }
 
     @Test
@@ -52,11 +47,11 @@ public class ProductTest {
         product.setProductPrice(productPrice);
         product.setProductStock(productStock);
 
-        assertEquals(product.getProductId(), "d255e6f5-448d-42b9-9f77-287082e5ab80");
-        assertEquals(product.getProductName(), "Laptop Macbook Pro");
-        assertEquals(product.getProductDescription(), "Laptop dengan prosesor M3 chip, memori 8GB, dan penyimpanan 1TB");
-        assertEquals(product.getProductPrice(), 25000000);
-        assertEquals(product.getProductStock(), 50);
+        assertEquals("d255e6f5-448d-42b9-9f77-287082e5ab80", product.getProductId());
+        assertEquals("Laptop Macbook Pro", product.getProductName());
+        assertEquals("Laptop dengan prosesor M3 chip, memori 8GB, dan penyimpanan 1TB", product.getProductDescription());
+        assertEquals(25000000, product.getProductPrice());
+        assertEquals(50, product.getProductStock());
     }
 
 
