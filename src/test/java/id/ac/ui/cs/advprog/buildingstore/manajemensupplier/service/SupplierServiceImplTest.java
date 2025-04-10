@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemensupplier.service;
 
 import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.dto.SupplierDTO;
+import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.factory.SupplierFactory;
 import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.model.Supplier;
 import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.repository.SupplierRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +23,9 @@ class SupplierServiceImplTest {
 
     @Mock
     private SupplierRepository supplierRepository;
+
+    @Mock
+    private SupplierFactory supplierFactory;
 
     @InjectMocks
     private SupplierServiceImpl supplierService;
@@ -53,10 +57,13 @@ class SupplierServiceImplTest {
                 .address("123 Main St")
                 .active(true)
                 .build();
+
+        when(supplierFactory.createSupplier(any(SupplierDTO.class))).thenReturn(supplier);
+        when(supplierFactory.createSupplierDTO(any(Supplier.class))).thenReturn(supplierDTO);
     }
 
     @Test
-    void createSupplier() {
+    void shouldCreateSupplier() {
         when(supplierRepository.save(any(Supplier.class))).thenReturn(supplier);
 
         SupplierDTO result = supplierService.createSupplier(supplierDTO);
@@ -64,38 +71,41 @@ class SupplierServiceImplTest {
         assertNotNull(result);
         assertEquals(supplierDTO.getName(), result.getName());
         verify(supplierRepository).save(any(Supplier.class));
+        verify(supplierFactory).createSupplier(any(SupplierDTO.class));
+        verify(supplierFactory).createSupplierDTO(any(Supplier.class));
     }
 
     @Test
-    void getAllSuppliers() {
+    void shouldGetAllSuppliers() {
         when(supplierRepository.findAll()).thenReturn(Arrays.asList(supplier));
 
         List<SupplierDTO> result = supplierService.getAllSuppliers();
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(supplier.getName(), result.get(0).getName());
+        verify(supplierFactory).createSupplierDTO(any(Supplier.class));
     }
 
     @Test
-    void getSupplierById() {
+    void shouldGetSupplierById() {
         when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.of(supplier));
 
         SupplierDTO result = supplierService.getSupplierById(id);
 
         assertNotNull(result);
-        assertEquals(supplier.getName(), result.getName());
+        assertEquals(supplierDTO.getName(), result.getName());
+        verify(supplierFactory).createSupplierDTO(any(Supplier.class));
     }
 
     @Test
-    void getSupplierById_notFound() {
+    void shouldThrowExceptionWhenSupplierNotFound() {
         when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> supplierService.getSupplierById(id));
     }
 
     @Test
-    void updateSupplier() {
+    void shouldUpdateSupplier() {
         when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.of(supplier));
         when(supplierRepository.save(any(Supplier.class))).thenReturn(supplier);
 
@@ -113,10 +123,11 @@ class SupplierServiceImplTest {
 
         assertNotNull(result);
         verify(supplierRepository).save(any(Supplier.class));
+        verify(supplierFactory).createSupplierDTO(any(Supplier.class));
     }
 
     @Test
-    void deleteSupplier() {
+    void shouldDeleteSupplier() {
         when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.of(supplier));
 
         supplierService.deleteSupplier(id);

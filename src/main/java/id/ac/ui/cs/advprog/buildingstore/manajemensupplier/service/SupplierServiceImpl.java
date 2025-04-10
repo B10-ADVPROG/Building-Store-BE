@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemensupplier.service;
 
 import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.dto.SupplierDTO;
+import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.factory.SupplierFactory;
 import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.model.Supplier;
 import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.repository.SupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,24 +15,25 @@ import java.util.stream.Collectors;
 public class SupplierServiceImpl implements SupplierService {
 
     private final SupplierRepository supplierRepository;
+    private final SupplierFactory supplierFactory;
 
     @Autowired
-    public SupplierServiceImpl(SupplierRepository supplierRepository) {
+    public SupplierServiceImpl(SupplierRepository supplierRepository, SupplierFactory supplierFactory) {
         this.supplierRepository = supplierRepository;
+        this.supplierFactory = supplierFactory;
     }
 
     @Override
     public SupplierDTO createSupplier(SupplierDTO supplierDTO) {
-        Supplier supplier = convertToEntity(supplierDTO);
-        supplier.setActive(true);
+        Supplier supplier = supplierFactory.createSupplier(supplierDTO);
         Supplier savedSupplier = supplierRepository.save(supplier);
-        return convertToDTO(savedSupplier);
+        return supplierFactory.createSupplierDTO(savedSupplier);
     }
 
     @Override
     public List<SupplierDTO> getAllSuppliers() {
         return supplierRepository.findAll().stream()
-                .map(this::convertToDTO)
+                .map(supplierFactory::createSupplierDTO)
                 .collect(Collectors.toList());
     }
 
@@ -39,7 +41,7 @@ public class SupplierServiceImpl implements SupplierService {
     public SupplierDTO getSupplierById(UUID id) {
         Supplier supplier = supplierRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Supplier not found with id: " + id));
-        return convertToDTO(supplier);
+        return supplierFactory.createSupplierDTO(supplier);
     }
 
     @Override
@@ -54,7 +56,7 @@ public class SupplierServiceImpl implements SupplierService {
         supplier.setAddress(supplierDTO.getAddress());
 
         Supplier updatedSupplier = supplierRepository.save(supplier);
-        return convertToDTO(updatedSupplier);
+        return supplierFactory.createSupplierDTO(updatedSupplier);
     }
 
     @Override
@@ -64,29 +66,5 @@ public class SupplierServiceImpl implements SupplierService {
         // Soft delete
         supplier.setActive(false);
         supplierRepository.save(supplier);
-    }
-
-    private SupplierDTO convertToDTO(Supplier supplier) {
-        return SupplierDTO.builder()
-                .id(supplier.getId())
-                .name(supplier.getName())
-                .contactPerson(supplier.getContactPerson())
-                .phone(supplier.getPhone())
-                .email(supplier.getEmail())
-                .address(supplier.getAddress())
-                .active(supplier.isActive())
-                .build();
-    }
-
-    private Supplier convertToEntity(SupplierDTO supplierDTO) {
-        return Supplier.builder()
-                .id(supplierDTO.getId())
-                .name(supplierDTO.getName())
-                .contactPerson(supplierDTO.getContactPerson())
-                .phone(supplierDTO.getPhone())
-                .email(supplierDTO.getEmail())
-                .address(supplierDTO.getAddress())
-                .active(supplierDTO.isActive())
-                .build();
     }
 }
