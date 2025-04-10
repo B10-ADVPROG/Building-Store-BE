@@ -12,6 +12,9 @@ public class ProductRepository {
     private List<Product> products = new ArrayList<>();
 
     public Product create(Product product) {
+        if (product == null) {
+            throw new IllegalArgumentException("Cannot create null product");
+        }
         products.add(product);
         return product;
     }
@@ -28,7 +31,15 @@ public class ProductRepository {
     }
 
     public Product update(String id, Product updatedProduct) {
+        if (updatedProduct == null) {
+            throw new IllegalArgumentException("Cannot update with null product");
+        }
+
         Product product = findById(id);
+        if (product == null) {
+            throw new IllegalArgumentException("Product not found for update");
+        }
+
         product.setProductName(updatedProduct.getProductName());
         product.setProductDescription(updatedProduct.getProductDescription());
         product.setProductPrice(updatedProduct.getProductPrice());

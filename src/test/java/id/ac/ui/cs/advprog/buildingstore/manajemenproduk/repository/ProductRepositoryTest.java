@@ -63,7 +63,7 @@ public class ProductRepositoryTest {
         assertEquals("Semen Tiga Roda 50 kg", readProduct.getProductName());
         assertEquals("Semen berkualitas tinggi untuk konstruksi bangunan", readProduct.getProductDescription());
         assertEquals(80000, readProduct.getProductPrice());
-        assertEquals(10, readProduct.getProductStock());
+        assertEquals(200, readProduct.getProductStock());
     }
 
     @Test
