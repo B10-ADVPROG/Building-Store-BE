@@ -12,12 +12,12 @@ public class ProductTest {
 
     @BeforeEach
     void setUp() {
-        product = new Product();
-        product.setProductId("960c03bc-9e06-41c7-aa50-cb582cee3e27");
-        product.setProductName("Semen Tiga Roda 50 kg");
-        product.setProductDescription("Semen berkualitas tinggi untuk konstruksi bangunan");
-        product.setProductPrice(80000);
-        product.setProductStock(100);
+        product = new Product.Builder()
+                .productName("Semen Tiga Roda 50 kg")
+                .productDescription("Semen berkualitas tinggi untuk konstruksi bangunan")
+                .productPrice(80000)
+                .productStock(100)
+                .build();
     }
 
 
@@ -25,7 +25,6 @@ public class ProductTest {
 
     @Test
     void testGetProduct() {
-        assertEquals("960c03bc-9e06-41c7-aa50-cb582cee3e27", product.getProductId());
         assertEquals("Semen Tiga Roda 50 kg", product.getProductName());
         assertEquals("Semen berkualitas tinggi untuk konstruksi bangunan", product.getProductDescription());
         assertEquals(80000, product.getProductPrice());

@@ -2,6 +2,9 @@ package id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
+
+import java.util.UUID;
 
 @Getter
 public class Product {
@@ -10,6 +13,17 @@ public class Product {
     private String productDescription;
     private int productPrice;
     private int productStock;
+
+    public Product() {
+    }
+
+    public Product(Builder builder) {
+        this.productId = builder.productId;
+        this.productName = builder.productName;
+        this.productDescription = builder.productDescription;
+        this.productPrice = builder.productPrice;
+        this.productStock = builder.productStock;
+    }
 
     public void setProductId(String productId) {
         if (productId == null) {
@@ -51,4 +65,44 @@ public class Product {
         }
         this.productStock = productStock;
     }
+
+    public static class Builder {
+        private String productId;
+        private String productName;
+        private String productDescription;
+        private int productPrice;
+        private int productStock;
+
+        public Builder() {  // Set the product id automatically and set default value for optional field
+            this.productId = UUID.randomUUID().toString();
+            this.productDescription = "";
+            this.productStock = 0;
+        }
+
+        public Builder productName(String productName) {
+            this.productName = productName;
+            return this;
+        }
+
+        public Builder productDescription(String productDescription) {
+            this.productDescription = productDescription;
+            return this;
+        }
+
+        public Builder productPrice(int productPrice) {
+            this.productPrice = productPrice;
+            return this;
+        }
+
+        public Builder productStock(int productStock) {
+            this.productStock = productStock;
+            return this;
+        }
+
+        public Product build() {
+            return new Product(this);
+        }
+    }
+
+
 }
