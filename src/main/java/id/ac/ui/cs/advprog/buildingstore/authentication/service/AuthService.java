@@ -7,7 +7,6 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.repository.AuthRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 
 @Service
@@ -38,6 +37,10 @@ public class AuthService {
     }
 
     public void logoutUser() {
+    }
+
+    public User findByEmail(String email) {
+        return authRepository.findByEmail(email);
     }
 
 
