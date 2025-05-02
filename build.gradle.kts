@@ -24,6 +24,7 @@ repositories {
 }
 
 dependencies {
+    implementation("io.jsonwebtoken:jjwt:0.2")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.projectlombok:lombok")

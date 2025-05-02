@@ -1,7 +1,9 @@
 package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.dto.LoginRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
+import id.ac.ui.cs.advprog.buildingstore.authentication.service.JwtService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,16 +24,14 @@ public class AuthController {
 
     @GetMapping("/register")
     public String registerPage(Model model) {
-        // Halaman register dari API Frontend
-        model.addAttribute("user", new User());
+        // Halaman register dari API Frontend (sementara menggunakan template spring boot)
         return "authentication/register";
     }
 
 
     @GetMapping("/login")
     public String loginPage(Model model) {
-        // Halaman login dari API Frontend (sementara menggunakan template langsung)
-        model.addAttribute("user", new User());
+        // Halaman login dari API Frontend (sementara menggunakan template spring boot)
         return "authentication/login";
     }
 }
@@ -40,6 +41,9 @@ public class AuthController {
 class RestAuthController {
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private JwtService jwtService;
 
 
     @PostMapping("/register")
@@ -60,6 +64,32 @@ class RestAuthController {
                     .body(Map.of("errors", List.of("Unexpected error: " + e.getMessage())));
         }
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<Object> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
+        boolean isAuthenticated = authService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
+
+        if (isAuthenticated) {
+            User user = authService.findByEmail(loginRequest.getEmail());
+
+            // // Generate JWT token
+            // String token = jwtService.generateToken(user);
+
+            // For simplicity, token will just be generated manually
+            String token = "Token";
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Login successful");
+            response.put("token", token);  // Add token to response
+
+            return ResponseEntity.ok(response);
+        } else {
+            Map<String, Object> error = new HashMap<>();
+            error.put("errors", List.of("Email or password is incorrect"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+    }
+
 
 }
 
