@@ -20,27 +20,12 @@ public class AuthService {
         this.authRepository = authRepository;
     }
 
-
-    public User registerUser(String email, String fullname, String password, String role) {
-        // Check if the user already exists
-        User existingUser = authRepository.findByEmail(email);
+    public User registerUser(User newUser) {
+        User existingUser = authRepository.findByEmail(newUser.getEmail());
         if (existingUser != null) {
             throw new IllegalArgumentException("Email is already taken");
         }
 
-        // Hash the password before saving
-
-        // Create the new user based on role
-        User newUser;
-        if (role.equals("administrator")) {
-            newUser = new Administrator(email, fullname, password);
-        } else if (role.equals("kasir")) {
-            newUser = new Kasir(email, fullname, password);
-        } else {
-            throw new IllegalArgumentException("Role is not valid");
-        }
-
-        // Save the user to the database
         return authRepository.save(newUser);
     }
 
