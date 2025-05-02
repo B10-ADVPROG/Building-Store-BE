@@ -66,7 +66,7 @@ class RestAuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestBody LoginRequest loginRequest, HttpSession session) {
+    public ResponseEntity<Object> login(@RequestBody LoginRequest loginRequest) {
         boolean isAuthenticated = authService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword());
 
         if (isAuthenticated) {
@@ -89,6 +89,37 @@ class RestAuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Object> logout(@RequestHeader("Authorization") String authorizationHeader) {
+        try {
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(400).body("Authorization header is missing or malformed");
+            }
+
+            String token = authorizationHeader.substring(7);
+
+//            // Verifikasi token
+//            if (jwtService.isTokenValid(token)) {
+//                // Token valid, invalidate session
+//                session.invalidate();
+//                return ResponseEntity.ok().body("Successfully logged out");
+//            } else {
+//                return ResponseEntity.status(401).body("Invalid or expired token");
+//            }
+
+            // For simplicity (only for debug)
+            if (token.equals("Token")) {
+                return ResponseEntity.ok().body(Map.of("message", "Logout successful"));
+            } else {
+                return ResponseEntity.status(401).body("Unauthorized");
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred during logout");
+        }
+    }
+
 
 
 }
