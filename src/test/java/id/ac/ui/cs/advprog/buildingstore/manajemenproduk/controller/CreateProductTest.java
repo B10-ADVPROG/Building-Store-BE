@@ -1,7 +1,7 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemenproduk.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.dto.ProductRequestDto;
+import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.dto.CreateProductRequest;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
@@ -96,7 +96,6 @@ public class CreateProductTest {
                 .productName(request.getProductName())
                 .productDescription(request.getProductDescription())
                 .productPrice(request.getProductPrice())
-                .productStock(request.getProductStock()) // Stock is null
                 .build();
 
         when(productService.create(Mockito.any(Product.class))).thenReturn(product);
