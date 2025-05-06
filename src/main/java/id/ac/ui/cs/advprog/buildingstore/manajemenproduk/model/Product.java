@@ -82,7 +82,9 @@ public class Product {
 
         public Builder productName(String productName) {
             this.productName = productName;
-            nameRequired = false;
+            if (productName != null && !productName.isEmpty()) {
+                nameRequired = false;
+            }
             return this;
         }
 
@@ -93,7 +95,9 @@ public class Product {
 
         public Builder productPrice(int productPrice) {
             this.productPrice = productPrice;
-            priceRequired = false;
+            if (productPrice > 0) {
+                priceRequired = false;
+            }
             return this;
         }
 

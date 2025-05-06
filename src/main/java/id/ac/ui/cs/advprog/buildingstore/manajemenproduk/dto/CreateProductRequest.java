@@ -39,7 +39,8 @@ public class CreateProductRequest {
     }
 
     public int getProductStock() {
-        return productStock;
+        return (productStock != null) ? productStock : 0;
     }
+
 
 }

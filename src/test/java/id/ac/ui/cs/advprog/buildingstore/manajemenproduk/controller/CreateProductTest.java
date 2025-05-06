@@ -70,7 +70,7 @@ public class CreateProductTest {
     }
 
     @Test
-    public void testCreateProductEmptyDescription() {
+    public void testCreateProductEmptyDescription() throws Exception {
         CreateProductRequest request = new CreateProductRequest("Semen", "", 80000, 100);
         Product product = new Product.Builder()
                 .productName(request.getProductName())
@@ -90,7 +90,7 @@ public class CreateProductTest {
     }
 
     @Test
-    public void testCreateProductEmptyStock() {
+    public void testCreateProductEmptyStock() throws Exception {
         CreateProductRequest request = new CreateProductRequest("Semen", "Deskripsi", 80000, null);
         Product product = new Product.Builder()
                 .productName(request.getProductName())
@@ -109,7 +109,7 @@ public class CreateProductTest {
     }
 
     @Test
-    public void testCreateProductEmptyName() {
+    public void testCreateProductEmptyName() throws Exception {
         CreateProductRequest request = new CreateProductRequest("", "Deskripsi", 80000, 100);
 
         mockMvc.perform(post("/product/create")
@@ -121,7 +121,7 @@ public class CreateProductTest {
     }
 
     @Test
-    public void testCreateProductEmptyPrice() {
+    public void testCreateProductEmptyPrice() throws Exception {
         CreateProductRequest request = new CreateProductRequest("Semen", "Deskripsi", null, 100);
 
         mockMvc.perform(post("/product/create")
