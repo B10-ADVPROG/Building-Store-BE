@@ -5,6 +5,7 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.dto.RegisterRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,12 +28,14 @@ public class RegisterTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    public void testRegister_SuccessfulKasir() throws Exception {
+    public void testRegisterSuccessfulKasir() throws Exception {
         RegisterRequest request = new RegisterRequest("kasir@example.com", "Budi Kasir", "pass123", "kasir");
+        User newUser = new User("kasir@example.com", "Budi Kasir", "pass123", "kasir");
 
         // Simulate service behavior
-        doNothing().when(authService).registerUser(any(User.class));
+        when(authService.registerUser(any(User.class))).thenReturn(newUser);
 
+        // Perform the POST request
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -41,11 +44,13 @@ public class RegisterTest {
     }
 
     @Test
-    public void testRegister_SuccessfulAdministrator() throws Exception {
+    public void testRegisterSuccessfulAdministrator() throws Exception {
         RegisterRequest request = new RegisterRequest("admin@example.com", "Sari Admin", "adminpass", "administrator");
+        User newUser = new User("admin@example.com", "Sari Admin", "adminpass", "administrator");
 
-        doNothing().when(authService).registerUser(any(User.class));
+        when(authService.registerUser(any(User.class))).thenReturn(newUser);
 
+        // Perform the POST request
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -54,7 +59,7 @@ public class RegisterTest {
     }
 
     @Test
-    public void testRegister_InvalidRole() throws Exception {
+    public void testRegisterInvalidRole() throws Exception {
         RegisterRequest request = new RegisterRequest("test@example.com", "Invalid Role", "password", "manager");
 
         mockMvc.perform(post("/auth/register")
@@ -65,7 +70,7 @@ public class RegisterTest {
     }
 
     @Test
-    public void testRegister_EmptyEmail() throws Exception {
+    public void testRegisterEmptyEmail() throws Exception {
         RegisterRequest request = new RegisterRequest("", "No Email", "password", "kasir");
 
         mockMvc.perform(post("/auth/register")

@@ -1,6 +1,8 @@
 package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.LoginRequest;
+import id.ac.ui.cs.advprog.buildingstore.authentication.dto.RegisterRequest;
+import id.ac.ui.cs.advprog.buildingstore.authentication.factory.UserFactory;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.JwtService;
@@ -42,18 +44,26 @@ class RestAuthController {
     @Autowired
     private AuthService authService;
 
-    @Autowired
-    private JwtService jwtService;
+//    @Autowired
+//    private JwtService jwtService;
 
 
     @PostMapping("/register")
-    public ResponseEntity<Object> registerPost(@RequestBody User user) {
+    public ResponseEntity<Object> registerPost(@RequestBody RegisterRequest registerRequest) {
         try {
+            User user = UserFactory.createUser(
+                    registerRequest.getRole(),
+                    registerRequest.getEmail(),
+                    registerRequest.getFullname(),
+                    registerRequest.getPassword()
+            );
+
             authService.registerUser(user);
-            String roleName = user.getRole();
+
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(Map.of("message", "New " + roleName + " is registered successfully"));
+                    .body(Map.of("message", "New " + user.getRole() + " is registered successfully"));
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
