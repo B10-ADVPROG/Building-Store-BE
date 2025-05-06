@@ -4,8 +4,7 @@ public class User {
     private String email;
     private String fullname;
     private String password;
-
-    private String role;
+    private UserRole role;
 
     public User(String email, String fullname, String password, String role) {
         setEmail(email);
@@ -42,11 +41,14 @@ public class User {
     }
 
     public String getRole() {
-        return role;
+        return role.getDisplayName();
     }
 
     public void setRole(String role) {
-        this.role = role;
+        if (role == null || role.isEmpty()) {
+            throw new IllegalArgumentException("Role cannot be empty");
+        }
+        this.role = UserRole.fromString(role);
     }
 
     public void setPassword(String password) {
