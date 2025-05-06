@@ -112,7 +112,7 @@ class RestAuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Object> logout(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<Object> logout(@RequestHeader(value="Authorization", required=false) String authorizationHeader) {
         try {
             if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(400).body("Authorization header is missing or malformed");
