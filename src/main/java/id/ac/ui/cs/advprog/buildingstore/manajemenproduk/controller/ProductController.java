@@ -1,17 +1,22 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemenproduk.controller;
 
 
+import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.dto.CreateProductRequest;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RestController
 @RequestMapping("/product")
+@Validated
 public class ProductController {
     @Autowired
     private ProductService productService;
@@ -69,23 +74,20 @@ public class ProductController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Map<String, String>> createProduct(@RequestBody Map<String, Object> requestBody, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Object> createProduct(@Valid @RequestBody CreateProductRequest requestBody, @RequestHeader("Authorization") String authHeader) {
         if (!isTokenValid(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
 
         try {
-            String productName = (String) requestBody.get("productName");
-            String productDescription = (String) requestBody.get("productDescription");
-            int productPrice = Integer.parseInt(requestBody.get("productPrice").toString());
-            int productStock = Integer.parseInt(requestBody.get("productStock").toString());
-
+            System.out.println("Checkpoint 1");
             Product newProduct = new Product.Builder()
-                    .productName(productName)
-                    .productDescription(productDescription)
-                    .productPrice(productPrice)
-                    .productStock(productStock)
+                    .productName(requestBody.getProductName())
+                    .productDescription(requestBody.getProductDescription())
+                    .productPrice(requestBody.getProductPrice())
+                    .productStock(requestBody.getProductStock())
                     .build();
+            System.out.println("Checkpoint 2");
 
             productService.create(newProduct);
 

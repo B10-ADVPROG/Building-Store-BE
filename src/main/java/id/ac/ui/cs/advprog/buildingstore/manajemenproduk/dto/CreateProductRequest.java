@@ -4,9 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class CreateProductRequest {
-
     @NotBlank(message = "Product name is required")
-    @NotNull(message = "Product name is required")
     private String productName;
 
     private String productDescription;
@@ -15,9 +13,6 @@ public class CreateProductRequest {
     private Integer productPrice;
 
     private Integer productStock;
-
-    public CreateProductRequest() {
-    }
 
     public CreateProductRequest(String productName, String productDescription, Integer productPrice, Integer productStock) {
         this.productName = productName;
@@ -34,7 +29,7 @@ public class CreateProductRequest {
         return productDescription;
     }
 
-    public int getProductPrice() {
+    public Integer getProductPrice() {
         return productPrice;
     }
 
