@@ -47,7 +47,7 @@ public class RegisterTest {
     @Test
     public void testRegisterSuccessfulAdministrator() throws Exception {
         RegisterRequest request = new RegisterRequest("admin@example.com", "Sari Admin", "adminpass", "administrator");
-        User newUser = UserFactory.createUser("administrator","admin@example.com", "Sari Admin", "adminpass");
+        User newUser = UserFactory.createUser(request.getRole(),request.getEmail(), request.getFullname(), request.getPassword());
 
         when(authService.registerUser(any(User.class))).thenReturn(newUser);
 
