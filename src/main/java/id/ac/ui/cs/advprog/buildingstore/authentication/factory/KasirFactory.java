@@ -8,3 +8,4 @@ public class KasirFactory extends UserFactory {
     public User createUser(String email, String fullname, String password) {
         return new Kasir(email, fullname, password);
     }
+}

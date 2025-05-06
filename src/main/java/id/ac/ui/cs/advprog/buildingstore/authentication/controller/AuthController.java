@@ -2,6 +2,8 @@ package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.LoginRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.RegisterRequest;
+import id.ac.ui.cs.advprog.buildingstore.authentication.factory.AdminFactory;
+import id.ac.ui.cs.advprog.buildingstore.authentication.factory.KasirFactory;
 import id.ac.ui.cs.advprog.buildingstore.authentication.factory.UserFactory;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
@@ -54,8 +56,9 @@ class RestAuthController {
     @PostMapping("/register")
     public ResponseEntity<Object> registerPost(@RequestBody RegisterRequest registerRequest) {
         try {
-            User user = UserFactory.createUser(
-                    registerRequest.getRole(),
+            UserFactory userFactory = getUserFactory(registerRequest.getRole());
+
+            User user = userFactory.createUser(
                     registerRequest.getEmail(),
                     registerRequest.getFullname(),
                     registerRequest.getPassword()
@@ -141,6 +144,17 @@ class RestAuthController {
         }
     }
 
+    // Helper method to get the appropriate factory
+    private UserFactory getUserFactory(String role) {
+        switch (role.toLowerCase()) {
+            case "kasir":
+                return new KasirFactory();
+            case "administrator":
+                return new AdminFactory();
+            default:
+                throw new IllegalArgumentException("Unknown role: " + role);
+        }
+    }
 
 
 }

@@ -3,7 +3,10 @@ package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.LoginRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.RegisterRequest;
+import id.ac.ui.cs.advprog.buildingstore.authentication.factory.KasirFactory;
 import id.ac.ui.cs.advprog.buildingstore.authentication.factory.UserFactory;
+import id.ac.ui.cs.advprog.buildingstore.authentication.factory.UserFactoryTest;
+import id.ac.ui.cs.advprog.buildingstore.authentication.model.Kasir;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.JwtService;
@@ -36,17 +39,26 @@ public class LoginTest {
 
     @Test
     public void testLoginSuccessful() throws Exception {
-        LoginRequest request = new LoginRequest("kasir@example.com", "pass123");
-        User user = new User("kasir@example.com", "Budi Kasir", "pass123", "kasir");
+        // Register the user first
+        RegisterRequest registerRequest = new RegisterRequest("kasir@example.com", "Budi Kasir", "kasirpass", "kasir");
+        UserFactory factory = new KasirFactory();
+        User user = factory.createUser(registerRequest.getEmail(), registerRequest.getFullname(), registerRequest.getPassword());
+        authService.registerUser(user);
+
         String token = "Token";
 
-        when(authService.authenticateUser("kasir@example.com", "pass123")).thenReturn(true);
-        when(authService.findByEmail("kasir@example.com")).thenReturn(user);
+        String email = registerRequest.getEmail();
+        String password = registerRequest.getPassword();
+
+        LoginRequest loginRequest = new LoginRequest(email, password);
+
+        when(authService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword())).thenReturn(true);
+        when(authService.findByEmail(loginRequest.getEmail())).thenReturn(user);
         when(jwtService.generateToken(user)).thenReturn(token);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Login successful"))
                 .andExpect(jsonPath("$.token").value(token));
@@ -56,7 +68,8 @@ public class LoginTest {
     public void testLoginInvalidCredentials() throws Exception {
         // Create a new user
         RegisterRequest registerRequest = new RegisterRequest("kasir@example.com", "Budi Kasir", "kasirpass", "kasir");
-        User user = UserFactory.createUser(registerRequest.getRole(), registerRequest.getEmail(), registerRequest.getFullname(), registerRequest.getPassword());
+        UserFactory factory = new KasirFactory();
+        User user = factory.createUser(registerRequest.getEmail(), registerRequest.getFullname(), registerRequest.getPassword());
         authService.registerUser(user);
 
         LoginRequest loginRequest = new LoginRequest("wrong@example.com", "wrongpass");

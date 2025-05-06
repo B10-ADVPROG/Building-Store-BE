@@ -2,6 +2,8 @@ package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.RegisterRequest;
+import id.ac.ui.cs.advprog.buildingstore.authentication.factory.AdminFactory;
+import id.ac.ui.cs.advprog.buildingstore.authentication.factory.KasirFactory;
 import id.ac.ui.cs.advprog.buildingstore.authentication.factory.UserFactory;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
@@ -31,7 +33,8 @@ public class RegisterTest {
     @Test
     public void testRegisterSuccessfulKasir() throws Exception {
         RegisterRequest request = new RegisterRequest("kasir@example.com", "Budi Kasir", "pass123", "kasir");
-        User newUser = UserFactory.createUser("kasir", "kasir@example.com", "Budi Kasir", "pass123");
+        UserFactory factory = new KasirFactory();
+        User newUser = factory.createUser("kasir@example.com", "Budi Kasir", "pass123");
 
         // Simulate service behavior
         when(authService.registerUser(any(User.class))).thenReturn(newUser);
@@ -47,7 +50,8 @@ public class RegisterTest {
     @Test
     public void testRegisterSuccessfulAdministrator() throws Exception {
         RegisterRequest request = new RegisterRequest("admin@example.com", "Sari Admin", "adminpass", "administrator");
-        User newUser = UserFactory.createUser(request.getRole(),request.getEmail(), request.getFullname(), request.getPassword());
+        UserFactory factory = new AdminFactory();
+        User newUser = factory.createUser(request.getEmail(), request.getFullname(), request.getPassword());
 
         when(authService.registerUser(any(User.class))).thenReturn(newUser);
 

@@ -10,29 +10,26 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserFactoryTest {
 
     @Test
-    public void testCreateKasir() {
-        User kasir = UserFactory.createUser("kasir", "kasir@gmail.com", "Kasir Test", "kasirpass");
+    public void testKasirFactoryCreatesKasir() {
+        UserFactory factory = new KasirFactory();
+        User kasir = factory.createUser("kasir@gmail.com", "Kasir Test", "kasirpass");
 
         assertInstanceOf(Kasir.class, kasir);
         assertEquals("Kasir", kasir.getRole());
         assertEquals("kasir@gmail.com", kasir.getEmail());
+        assertEquals("Kasir Test", kasir.getFullname());
     }
 
     @Test
-    public void testCreateAdministrator() {
-        User admin = UserFactory.createUser("administrator", "admin@gmail.com", "Admin Test", "adminpass");
+    public void testAdministratorFactoryCreatesAdministrator() {
+        UserFactory factory = new AdminFactory();
+        User admin = factory.createUser("admin@gmail.com", "Admin Test", "adminpass");
 
         assertInstanceOf(Administrator.class, admin);
         assertEquals("Administrator", admin.getRole());
         assertEquals("admin@gmail.com", admin.getEmail());
+        assertEquals("Admin Test", admin.getFullname());
     }
 
-    @Test
-    public void testInvalidRoleThrowsException() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            UserFactory.createUser("manager", "manager@gmail.com", "Manager Test", "managerpass");
-        });
 
-        assertEquals("Unknown role: manager", exception.getMessage());
-    }
 }
