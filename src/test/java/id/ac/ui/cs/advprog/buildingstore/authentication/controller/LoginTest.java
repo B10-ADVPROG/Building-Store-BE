@@ -2,6 +2,8 @@ package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.LoginRequest;
+import id.ac.ui.cs.advprog.buildingstore.authentication.dto.RegisterRequest;
+import id.ac.ui.cs.advprog.buildingstore.authentication.factory.UserFactory;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.JwtService;
@@ -52,15 +54,20 @@ public class LoginTest {
 
     @Test
     public void testLoginInvalidCredentials() throws Exception {
-        LoginRequest request = new LoginRequest("wrong@example.com", "wrongpass");
+        // Create a new user
+        RegisterRequest registerRequest = new RegisterRequest("kasir@example.com", "Budi Kasir", "kasirpass", "kasir");
+        User user = UserFactory.createUser(registerRequest.getRole(), registerRequest.getEmail(), registerRequest.getFullname(), registerRequest.getPassword());
+        authService.registerUser(user);
 
-        when(authService.authenticateUser("wrong@example.com", "wrongpass")).thenReturn(false);
+        LoginRequest loginRequest = new LoginRequest("wrong@example.com", "wrongpass");
+
+        when(authService.authenticateUser(loginRequest.getEmail(), loginRequest.getPassword())).thenReturn(false);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.errors[0]").value("Invalid email or password"));
+                .andExpect(jsonPath("$.errors[0]").value("Email or password is incorrect"));
     }
 
     @Test
