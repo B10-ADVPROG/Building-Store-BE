@@ -13,7 +13,8 @@ public class SupplierRatingServiceTest {
     @Test
     void testGetSupplierRating() {
         WebClient webClient = mock(WebClient.class, RETURNS_DEEP_STUBS);
-        SupplierRatingService service = new SupplierRatingService(webClient);
+        String baseUrl = "https://api.example.com";
+        SupplierRatingService service = new SupplierRatingService(webClient, baseUrl);
 
         when(webClient.get().uri(any(String.class)).retrieve().bodyToMono(Double.class))
                 .thenReturn(Mono.just(4.5));
