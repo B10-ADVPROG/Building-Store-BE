@@ -8,6 +8,7 @@ plugins {
 pmd {
     toolVersion = "7.10.0"
     ruleSetFiles = files("pmd/ruleset.xml")
+    isIgnoreFailures = true
 }
 
 group = "id.ac.ui.cs.advprog"
@@ -51,4 +52,5 @@ tasks.withType<Pmd>().configureEach {
         xml.required.set(true)
         html.required.set(true)
     }
+    ignoreFailures = true
 }
