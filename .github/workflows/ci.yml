@@ -8,8 +8,10 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+
+    env:
+      JDBC_URI: ${{ secrets.JDBC_URI }}
 
     steps:
       - name: Checkout code

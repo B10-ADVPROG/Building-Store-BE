@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Table(name = "app_user")
 public class User {
     @Id
     private String email;
