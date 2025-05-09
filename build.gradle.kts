@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
+    id("jacoco")
 }
 
 group = "id.ac.ui.cs.advprog"
@@ -36,8 +37,35 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+tasks.register<Test>("unitTest") {
+	description = "Run unit tests."
+	group = "verification"
+	filter {
+		excludeTestsMatching("*FunctionalTest")
+	}
+}
+
+
+tasks.withType<Test>().configureEach {
+	useJUnitPlatform()
+}
+
+tasks.test {
+	filter {
+		excludeTestsMatching("*FunctionalTest")
+	}
+
+	finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+
+	reports {
+		html.required = true
+		xml.required = true
+	}
 }
