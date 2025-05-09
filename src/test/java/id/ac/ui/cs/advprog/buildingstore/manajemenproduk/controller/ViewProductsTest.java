@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -49,7 +47,7 @@ public class ViewProductsTest {
     }
 
     @Test
-    void testAllProducts_withValidToken_returnsProductList() throws Exception {
+    void testViewProducts() throws Exception {
         Mockito.when(productService.findAll()).thenReturn(List.of(product1, product2));
 
         mockMvc.perform(get("/product")
@@ -63,7 +61,7 @@ public class ViewProductsTest {
     }
 
     @Test
-    void testAllProducts_withInvalidToken_returnsUnauthorized() throws Exception {
+    void testInvalidToken() throws Exception {
         mockMvc.perform(get("/product")
                         .header("Authorization", "Bearer InvalidToken"))
                 .andExpect(status().isUnauthorized())
@@ -71,7 +69,7 @@ public class ViewProductsTest {
     }
 
     @Test
-    void testAllProducts_withNoToken_returnsUnauthorized() throws Exception {
+    void testNoToken() throws Exception {
         mockMvc.perform(get("/product"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message", is("Invalid or missing token")));

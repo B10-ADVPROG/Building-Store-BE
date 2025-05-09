@@ -29,7 +29,7 @@ public class ProductController {
         return token.equals("Token");
     }
 
-    @GetMapping("")
+    @GetMapping("/")
     public ResponseEntity<Object> allProducts(@RequestHeader("Authorization") String authHeader) {
         if (!isTokenValid(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
@@ -37,6 +37,10 @@ public class ProductController {
 
         List<Product> products = productService.findAll();
         List<Map<String, Object>> response = new ArrayList<>();
+
+        if (products.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "No products available"));
+        }
 
         for (Product product : products) {
             Map<String, Object> productMap = new HashMap<>();
