@@ -50,7 +50,7 @@ public class ViewProductsTest {
     void testViewProducts() throws Exception {
         Mockito.when(productService.findAll()).thenReturn(List.of(product1, product2));
 
-        mockMvc.perform(get("/product")
+        mockMvc.perform(get("/product/")
                         .header("Authorization", "Bearer Token"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -62,7 +62,7 @@ public class ViewProductsTest {
 
     @Test
     void testInvalidToken() throws Exception {
-        mockMvc.perform(get("/product")
+        mockMvc.perform(get("/product/")
                         .header("Authorization", "Bearer InvalidToken"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message", is("Invalid or missing token")));
@@ -70,7 +70,7 @@ public class ViewProductsTest {
 
     @Test
     void testNoToken() throws Exception {
-        mockMvc.perform(get("/product"))
+        mockMvc.perform(get("/product/"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message", is("Invalid or missing token")));
     }

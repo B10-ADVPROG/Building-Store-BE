@@ -30,7 +30,7 @@ public class ProductController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Object> allProducts(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Object> allProducts(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isTokenValid(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
