@@ -6,14 +6,9 @@ import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.model.Supplier;
 import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.repository.SupplierRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -77,7 +72,7 @@ class SupplierServiceImplTest {
 
     @Test
     void shouldGetAllSuppliers() {
-        when(supplierRepository.findAll()).thenReturn(Arrays.asList(supplier));
+        when(supplierRepository.findAll()).thenReturn(Collections.singletonList(supplier));
 
         List<SupplierDTO> result = supplierService.getAllSuppliers();
 
@@ -127,11 +122,35 @@ class SupplierServiceImplTest {
     }
 
     @Test
+    void shouldThrowExceptionWhenUpdateSupplierNotFound() {
+        when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        SupplierDTO updatedDTO = SupplierDTO.builder()
+                .id(id)
+                .name("Updated Name")
+                .contactPerson("Jane Smith")
+                .phone("987-654-3210")
+                .email("updated@example.com")
+                .address("456 New St")
+                .active(true)
+                .build();
+
+        assertThrows(IllegalArgumentException.class, () -> supplierService.updateSupplier(id, updatedDTO));
+    }
+
+    @Test
     void shouldDeleteSupplier() {
         when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.of(supplier));
 
         supplierService.deleteSupplier(id);
 
         verify(supplierRepository).save(any(Supplier.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDeleteSupplierNotFound() {
+        when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> supplierService.deleteSupplier(id));
     }
 }
