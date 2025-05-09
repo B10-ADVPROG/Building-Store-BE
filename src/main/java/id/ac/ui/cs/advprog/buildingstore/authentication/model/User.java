@@ -1,6 +1,12 @@
 package id.ac.ui.cs.advprog.buildingstore.authentication.model;
 
+import jakarta.persistence.*;
+
+
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public class User {
+    @Id
     private String email;
     private String fullname;
     private String password;
