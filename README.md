@@ -14,3 +14,20 @@
 ![container-diagram](assets/images/container-diagram.jpg)
 #### Deployment Diagram
 ![deployment-diagram](assets/images/deployment-diagram.jpg)
+
+## Risk Analysis
+
+As the Building Store project grows and achieves greater success, several architectural risks may arise:
+
+- **Scalability Bottlenecks:** The current architecture may not handle a large number of users or transactions efficiently, leading to slow response times or downtime.
+- **Single Point of Failure:** If the backend service fails, the entire system becomes unavailable to all users.
+- **Data Consistency Issues:** With increased concurrent access, maintaining accurate and consistent data (especially for inventory and payments) becomes more challenging.
+- **Security Vulnerabilities:** More users and integrations increase the risk of data breaches, unauthorized access, and fraud.
+- **Difficult Maintenance and Deployment:** A monolithic backend makes it harder to update or deploy features independently, increasing the risk of downtime during updates.
+- **Integration Complexity:** As the system integrates with more third-party services (e.g., payment gateways, suppliers), managing and monitoring these integrations becomes more complex.
+
+To address these risks, we applied the **Risk Storming** technique to collaboratively identify, discuss, and prioritize architectural risks. This process guided us to design a more modular, scalable, and resilient future architecture.
+
+### 2. Future Architecture
+
+![Future-diagram](assets/images/future-architect.jpg)
