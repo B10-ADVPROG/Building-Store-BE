@@ -5,3 +5,10 @@
 3.  Nadya Aysha (2206081635) - Transaksi Penjualan
 4.  Daffa Rayhan Ananda (2306152235) - Manajemen Pembayaran
 5.  William Alexander (2306226914) - Manajemen Produk
+
+
+### 4. Individu - William Alexander
+#### Code Diagram
+!(code-diagram)[assets/images/code-diagram-manajemen-produk.jpg]
+#### Component Diagram
+!(component-diagram)[assets/images/component-diagram-manajemen-produk.jpg]
