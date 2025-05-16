@@ -9,6 +9,6 @@
 
 ### 4. Individu - William Alexander
 #### Code Diagram
-!(code-diagram)[assets/images/code-diagram-manajemen-produk.jpg]
+![code-diagram](assets/images/code-diagram-manajemen-produk.jpg)
 #### Component Diagram
-!(component-diagram)[assets/images/component-diagram-manajemen-produk.jpg]
+![component-diagram](assets/images/component-diagram-manajemen-produk.jpg)
