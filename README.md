@@ -35,3 +35,12 @@ To address these risks, we applied the **Risk Storming** technique to collaborat
 ### 3. Explanation of Risk Storming
 
 Risk Storming was applied to proactively identify and address potential architectural risks as our project scales. By collaboratively brainstorming risks, our team was able to uncover hidden vulnerabilities and prioritize them based on their impact and likelihood. This technique ensured that we considered a wide range of possible issues—from scalability and security to integration and maintainability—before they could threaten the system. As a result, Risk Storming guided us to design a more modular, resilient, and future-proof architecture, supporting the long-term success and reliability of the Building Store project.
+
+# Feature
+
+## Manajemen Supplier
+Code Diagram:
+![image](assets/images/code_diagram_MS.jpg)
+
+Container Diagram:
+![image](assets/images/containerdia_MS.jpg)
