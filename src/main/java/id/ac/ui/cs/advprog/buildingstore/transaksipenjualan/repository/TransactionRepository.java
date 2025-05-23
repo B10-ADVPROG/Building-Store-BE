@@ -26,13 +26,15 @@ public class TransactionRepository {
         return new ArrayList<>(storage.values());
     }
 
-    public void delete(String id) {
+    public void deleteById(String id) {
         storage.remove(id);
     }
 
-    public void update(String id, SalesTransaction updatedTransaction) {
+    public SalesTransaction update(String id, SalesTransaction updatedTransaction) {
         if (storage.containsKey(id)) {
             storage.put(id, updatedTransaction);
+            return updatedTransaction;
         }
+        return null;
     }
 }

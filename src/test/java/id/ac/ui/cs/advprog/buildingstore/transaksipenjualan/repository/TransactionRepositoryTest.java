@@ -67,7 +67,7 @@ public class TransactionRepositoryTest {
 
     @Test
     void testDelete() {
-        transactionRepository.delete(transaction1.getTransactionId());
+        transactionRepository.deleteById(transaction1.getTransactionId());
         assertNull(transactionRepository.findById(transaction1.getTransactionId()));
         assertEquals(1, transactionRepository.findAll().size());
     }

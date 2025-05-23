@@ -10,4 +10,5 @@ public interface ProductService {
     public Product findById(String id);
     public Product update(String id, Product product);
     public void delete(String id);
+    public void reduceStock(Product product, int quantity);
 }

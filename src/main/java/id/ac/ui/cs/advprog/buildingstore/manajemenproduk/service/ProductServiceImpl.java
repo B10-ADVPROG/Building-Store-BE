@@ -46,5 +46,14 @@ public class ProductServiceImpl implements ProductService {
         repository.delete(id);
     }
 
+    @Override
+    public void reduceStock(Product product, int quantity) {
+        if (product.getProductStock() < quantity) {
+            throw new IllegalArgumentException("Stok tidak cukup");
+        }
+        product.setProductStock(product.getProductStock() - quantity);
+    }
+
+
 
 }
