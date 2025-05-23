@@ -52,7 +52,8 @@ public class CreateProductTest {
 
         when(productService.create(Mockito.any(Product.class))).thenReturn(product);
 
-        mockMvc.perform(post("/product/create")
+        mockMvc.perform(post("/product/create/" +
+                        "")
                         .header("Authorization", validToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -64,7 +65,7 @@ public class CreateProductTest {
     public void testCreateProductUnauthorized() throws Exception {
         CreateProductRequest request = new CreateProductRequest("Semen Tiga Roda", "Deskripsi", 80000, 100);
 
-        mockMvc.perform(post("/product/create")
+        mockMvc.perform(post("/product/create/")
                         .header("Authorization", "Bearer invalid-token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -84,7 +85,7 @@ public class CreateProductTest {
 
         when(productService.create(Mockito.any(Product.class))).thenReturn(product);
 
-        mockMvc.perform(post("/product/create")
+        mockMvc.perform(post("/product/create/")
                         .header("Authorization", validToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -103,7 +104,7 @@ public class CreateProductTest {
 
         when(productService.create(Mockito.any(Product.class))).thenReturn(product);
 
-        mockMvc.perform(post("/product/create")
+        mockMvc.perform(post("/product/create/")
                         .header("Authorization", validToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -115,7 +116,7 @@ public class CreateProductTest {
     public void testCreateProductEmptyName() throws Exception {
         CreateProductRequest request = new CreateProductRequest("", "Deskripsi", 80000, 100);
 
-        mockMvc.perform(post("/product/create")
+        mockMvc.perform(post("/product/create/")
                         .header("Authorization", validToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -127,7 +128,7 @@ public class CreateProductTest {
     public void testCreateProductEmptyPrice() throws Exception {
         CreateProductRequest request = new CreateProductRequest("Semen", "Deskripsi", null, 100);
 
-        mockMvc.perform(post("/product/create")
+        mockMvc.perform(post("/product/create/")
                         .header("Authorization", validToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
