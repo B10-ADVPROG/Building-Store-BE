@@ -30,11 +30,9 @@ public class TransactionRepository {
         storage.remove(id);
     }
 
-    public SalesTransaction update(String id, SalesTransaction updatedTransaction) {
+    public void update(String id, SalesTransaction updatedTransaction) {
         if (storage.containsKey(id)) {
             storage.put(id, updatedTransaction);
-            return updatedTransaction;
         }
-        return null;
     }
 }

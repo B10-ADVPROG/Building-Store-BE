@@ -122,28 +122,46 @@ public class TransactionServiceTest {
 
     @Test
     void testUpdateStatusValid() {
-        Map<Product, Integer> products = Map.of(product1, 1);
+        Map<Product, Integer> products = new LinkedHashMap<>();
+        products.put(product1, 1);
+
         SalesTransaction transaction = new SalesTransaction(products);
         String id = transaction.getTransactionId();
+
+        when(transactionRepository.findById(id)).thenReturn(transaction);
+
+        doAnswer(invocation -> {
+            String argId = invocation.getArgument(0);
+            SalesTransaction updatedTx = invocation.getArgument(1);
+            assertEquals(id, argId);
+            transaction.setStatus(updatedTx.getStatus());
+            return null;
+        }).when(transactionRepository).update(eq(id), any(SalesTransaction.class));
 
         transactionService.update(id);
 
-        SalesTransaction updated = transactionService.findById(id);
-
-        assertEquals(SalesTransaction.Status.COMPLETED, updated.getStatus());
+        assertEquals(SalesTransaction.Status.COMPLETED, transaction.getStatus());
     }
+
 
     @Test
     void testUpdateStatusInvalid() {
-        Map<Product, Integer> products = Map.of(product1, 1);
+        Map<Product, Integer> products = new LinkedHashMap<>();
+        products.put(product1, 1);
+
         SalesTransaction transaction = new SalesTransaction(products);
-        transaction.setStatus(SalesTransaction.Status.COMPLETED);
+        transaction.setStatus(SalesTransaction.Status.COMPLETED); // sudah completed
         String id = transaction.getTransactionId();
 
-        assertThrows(IllegalArgumentException.class, () -> transactionService.update(id));
+        when(transactionRepository.findById(id)).thenReturn(transaction);
 
-        SalesTransaction updated = transactionService.findById(id);
-        assertEquals(SalesTransaction.Status.COMPLETED, updated.getStatus());
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.update(id);
+        });
+
+        assertEquals("Only transactions with status IN_PROGRESS can be updated", ex.getMessage());
+
+        verify(transactionRepository, never()).update(anyString(), any());
     }
 
 

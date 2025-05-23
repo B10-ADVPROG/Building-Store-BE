@@ -41,7 +41,15 @@ public class TransactionService {
         transactionRepository.deleteById(id);
     }
 
-    public SalesTransaction update(SalesTransaction transaction) {
-        return transactionRepository.update(transaction.getTransactionId(), transaction);
+    public void update(String id) {
+        SalesTransaction transaction = transactionRepository.findById(id);
+        if (transaction == null) {
+            throw new IllegalArgumentException("Transaction with id " + id + " not found");
+        }
+        if (transaction.getStatus() != SalesTransaction.Status.IN_PROGRESS) {
+            throw new IllegalArgumentException("Only transactions with status IN_PROGRESS can be updated");
+        }
+        transaction.setStatus(SalesTransaction.Status.COMPLETED);
+        transactionRepository.update(id, transaction);
     }
 }
