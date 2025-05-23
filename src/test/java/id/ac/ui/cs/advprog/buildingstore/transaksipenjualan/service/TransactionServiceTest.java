@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -82,4 +83,74 @@ public class TransactionServiceTest {
         verify(productService).reduceStock(product1, 1000);
         verify(transactionRepository, never()).save(any());
     }
+
+
+    @Test
+    void testFindById() {
+        Map<Product, Integer> products = Map.of(product1, 1);
+        SalesTransaction transaction = new SalesTransaction(products);
+        String id = transaction.getTransactionId();
+
+        when(transactionRepository.findById(id)).thenReturn(transaction);
+
+        SalesTransaction found = transactionService.findById(id);
+
+        verify(transactionRepository).findById(id);
+        assertNotNull(found);
+        assertEquals(id, found.getTransactionId());
+    }
+
+    @Test
+    void testFindAll() {
+        Map<Product, Integer> products1 = Map.of(product1, 1);
+        Map<Product, Integer> products2 = Map.of(product2, 2);
+
+        SalesTransaction transaction1 = new SalesTransaction(products1);
+        SalesTransaction transaction2 = new SalesTransaction(products2);
+
+        List<SalesTransaction> transactions = List.of(transaction1, transaction2);
+
+        when(transactionRepository.findAll()).thenReturn(transactions);
+
+        List<SalesTransaction> foundList = transactionService.findAll();
+
+        verify(transactionRepository).findAll();
+        assertEquals(2, foundList.size());
+        assertTrue(foundList.contains(transaction1));
+        assertTrue(foundList.contains(transaction2));
+    }
+
+    @Test
+    void testUpdateStatusValid() {
+        Map<Product, Integer> products = Map.of(product1, 1);
+        SalesTransaction transaction = new SalesTransaction(products);
+        String id = transaction.getTransactionId();
+
+        transactionService.update(id);
+
+        SalesTransaction updated = transactionService.findById(id);
+
+        assertEquals(SalesTransaction.Status.COMPLETED, updated.getStatus());
+    }
+
+    @Test
+    void testUpdateStatusInvalid() {
+        Map<Product, Integer> products = Map.of(product1, 1);
+        SalesTransaction transaction = new SalesTransaction(products);
+        transaction.setStatus(SalesTransaction.Status.COMPLETED);
+        String id = transaction.getTransactionId();
+
+        assertThrows(IllegalArgumentException.class, () -> transactionService.update(id));
+
+        SalesTransaction updated = transactionService.findById(id);
+        assertEquals(SalesTransaction.Status.COMPLETED, updated.getStatus());
+    }
+
+
+
+
+
+
+
+
 }
