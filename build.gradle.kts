@@ -2,6 +2,13 @@ plugins {
     java
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
+    id("pmd")
+}
+
+pmd {
+    toolVersion = "7.10.0"
+    ruleSetFiles = files("pmd/ruleset.xml")
+    isIgnoreFailures = true
 }
 
 group = "id.ac.ui.cs.advprog"
@@ -24,6 +31,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.projectlombok:lombok")
@@ -36,4 +44,12 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.withType<Pmd>().configureEach {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+    ignoreFailures = true
 }
