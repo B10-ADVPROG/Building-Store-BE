@@ -7,10 +7,12 @@ import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.repository.SupplierRe
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -21,6 +23,9 @@ class SupplierServiceImplTest {
 
     @Mock
     private SupplierFactory supplierFactory;
+    
+    @Mock
+    private SupplierRatingService supplierRatingService;
 
     @InjectMocks
     private SupplierServiceImpl supplierService;
@@ -61,23 +66,25 @@ class SupplierServiceImplTest {
     void shouldCreateSupplier() {
         when(supplierRepository.save(any(Supplier.class))).thenReturn(supplier);
 
-        SupplierDTO result = supplierService.createSupplier(supplierDTO);
+        Mono<SupplierDTO> result = supplierService.createSupplier(supplierDTO);
 
-        assertNotNull(result);
-        assertEquals(supplierDTO.getName(), result.getName());
-        verify(supplierRepository).save(any(Supplier.class));
+        StepVerifier.create(result)
+                .expectNextMatches(dto -> dto.getName().equals(supplierDTO.getName()))
+                .verifyComplete();
+                
         verify(supplierFactory).createSupplier(any(SupplierDTO.class));
-        verify(supplierFactory).createSupplierDTO(any(Supplier.class));
     }
 
     @Test
     void shouldGetAllSuppliers() {
         when(supplierRepository.findAll()).thenReturn(Collections.singletonList(supplier));
 
-        List<SupplierDTO> result = supplierService.getAllSuppliers();
+        Flux<SupplierDTO> result = supplierService.getAllSuppliers();
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+                
         verify(supplierFactory).createSupplierDTO(any(Supplier.class));
     }
 
@@ -85,10 +92,12 @@ class SupplierServiceImplTest {
     void shouldGetSupplierById() {
         when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.of(supplier));
 
-        SupplierDTO result = supplierService.getSupplierById(id);
+        Mono<SupplierDTO> result = supplierService.getSupplierById(id);
 
-        assertNotNull(result);
-        assertEquals(supplierDTO.getName(), result.getName());
+        StepVerifier.create(result)
+                .expectNextMatches(dto -> dto.getName().equals(supplierDTO.getName()))
+                .verifyComplete();
+                
         verify(supplierFactory).createSupplierDTO(any(Supplier.class));
     }
 
@@ -96,7 +105,11 @@ class SupplierServiceImplTest {
     void shouldThrowExceptionWhenSupplierNotFound() {
         when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> supplierService.getSupplierById(id));
+        Mono<SupplierDTO> result = supplierService.getSupplierById(id);
+
+        StepVerifier.create(result)
+                .expectError(IllegalArgumentException.class)
+                .verify();
     }
 
     @Test
@@ -114,11 +127,13 @@ class SupplierServiceImplTest {
                 .active(true)
                 .build();
 
-        SupplierDTO result = supplierService.updateSupplier(id, updatedDTO);
+        Mono<SupplierDTO> result = supplierService.updateSupplier(id, updatedDTO);
 
-        assertNotNull(result);
+        StepVerifier.create(result)
+                .expectNextMatches(dto -> dto != null)
+                .verifyComplete();
+                
         verify(supplierRepository).save(any(Supplier.class));
-        verify(supplierFactory).createSupplierDTO(any(Supplier.class));
     }
 
     @Test
@@ -135,15 +150,23 @@ class SupplierServiceImplTest {
                 .active(true)
                 .build();
 
-        assertThrows(IllegalArgumentException.class, () -> supplierService.updateSupplier(id, updatedDTO));
+        Mono<SupplierDTO> result = supplierService.updateSupplier(id, updatedDTO);
+
+        StepVerifier.create(result)
+                .expectError(IllegalArgumentException.class)
+                .verify();
     }
 
     @Test
     void shouldDeleteSupplier() {
         when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.of(supplier));
+        when(supplierRepository.save(any(Supplier.class))).thenReturn(supplier);
 
-        supplierService.deleteSupplier(id);
+        Mono<Void> result = supplierService.deleteSupplier(id);
 
+        StepVerifier.create(result)
+                .verifyComplete();
+                
         verify(supplierRepository).save(any(Supplier.class));
     }
 
@@ -151,6 +174,22 @@ class SupplierServiceImplTest {
     void shouldThrowExceptionWhenDeleteSupplierNotFound() {
         when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> supplierService.deleteSupplier(id));
+        Mono<Void> result = supplierService.deleteSupplier(id);
+
+        StepVerifier.create(result)
+                .expectError(IllegalArgumentException.class)
+                .verify();
+    }
+    
+    @Test
+    void shouldGetSupplierWithRating() {
+        when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.of(supplier));
+        when(supplierRatingService.getSupplierRating(anyString())).thenReturn(Mono.just(4.5));
+
+        Mono<SupplierDTO> result = supplierService.getSupplierWithRating(id);
+
+        StepVerifier.create(result)
+                .expectNextMatches(dto -> dto.getName().equals(supplierDTO.getName()))
+                .verifyComplete();
     }
 }

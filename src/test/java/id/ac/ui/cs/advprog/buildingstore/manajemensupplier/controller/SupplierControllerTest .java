@@ -5,11 +5,14 @@ import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.service.SupplierServi
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class SupplierControllerTest {
@@ -40,56 +43,78 @@ class SupplierControllerTest {
 
     @Test
     void testCreateSupplier() {
-        when(supplierService.createSupplier(any(SupplierDTO.class))).thenReturn(supplierDTO);
+        when(supplierService.createSupplier(any(SupplierDTO.class))).thenReturn(Mono.just(supplierDTO));
 
-        ResponseEntity<SupplierDTO> response = supplierController.createSupplier(supplierDTO);
-
-        assertEquals(supplierDTO, response.getBody());
-        assertEquals(200, response.getStatusCodeValue());
-        verify(supplierService).createSupplier(supplierDTO);
+        Mono<SupplierDTO> result = supplierController.createSupplier(supplierDTO);
+        
+        StepVerifier.create(result)
+            .expectNext(supplierDTO)
+            .verifyComplete();
+            
+        verify(supplierService).createSupplier(any(SupplierDTO.class));
     }
 
     @Test
     void testGetAllSuppliers() {
-        List<SupplierDTO> list = Collections.singletonList(supplierDTO);
-        when(supplierService.getAllSuppliers()).thenReturn(list);
+        when(supplierService.getAllSuppliers()).thenReturn(Flux.just(supplierDTO));
 
-        ResponseEntity<List<SupplierDTO>> response = supplierController.getAllSuppliers();
+        Flux<SupplierDTO> result = supplierController.getAllSuppliers();
 
-        assertEquals(list, response.getBody());
-        assertEquals(200, response.getStatusCodeValue());
+        StepVerifier.create(result)
+            .expectNext(supplierDTO)
+            .verifyComplete();
+            
         verify(supplierService).getAllSuppliers();
     }
 
     @Test
     void testGetSupplierById() {
-        when(supplierService.getSupplierById(id)).thenReturn(supplierDTO);
+        when(supplierService.getSupplierById(id)).thenReturn(Mono.just(supplierDTO));
 
-        ResponseEntity<SupplierDTO> response = supplierController.getSupplierById(id);
+        Mono<SupplierDTO> result = supplierController.getSupplierById(id);
 
-        assertEquals(supplierDTO, response.getBody());
-        assertEquals(200, response.getStatusCodeValue());
+        StepVerifier.create(result)
+            .expectNext(supplierDTO)
+            .verifyComplete();
+            
         verify(supplierService).getSupplierById(id);
     }
 
     @Test
     void testUpdateSupplier() {
-        when(supplierService.updateSupplier(eq(id), any(SupplierDTO.class))).thenReturn(supplierDTO);
+        when(supplierService.updateSupplier(eq(id), any(SupplierDTO.class))).thenReturn(Mono.just(supplierDTO));
 
-        ResponseEntity<SupplierDTO> response = supplierController.updateSupplier(id, supplierDTO);
+        Mono<SupplierDTO> result = supplierController.updateSupplier(id, supplierDTO);
 
-        assertEquals(supplierDTO, response.getBody());
-        assertEquals(200, response.getStatusCodeValue());
-        verify(supplierService).updateSupplier(id, supplierDTO);
+        StepVerifier.create(result)
+            .expectNext(supplierDTO)
+            .verifyComplete();
+            
+        verify(supplierService).updateSupplier(eq(id), any(SupplierDTO.class));
     }
 
     @Test
     void testDeleteSupplier() {
-        doNothing().when(supplierService).deleteSupplier(id);
+        when(supplierService.deleteSupplier(id)).thenReturn(Mono.empty());
 
-        ResponseEntity<Void> response = supplierController.deleteSupplier(id);
+        Mono<Void> result = supplierController.deleteSupplier(id);
 
-        assertEquals(204, response.getStatusCodeValue());
+        StepVerifier.create(result)
+            .verifyComplete();
+            
         verify(supplierService).deleteSupplier(id);
+    }
+    
+    @Test
+    void testGetSupplierWithRating() {
+        when(supplierService.getSupplierWithRating(id)).thenReturn(Mono.just(supplierDTO));
+        
+        Mono<SupplierDTO> result = supplierController.getSupplierWithRating(id);
+        
+        StepVerifier.create(result)
+            .expectNext(supplierDTO)
+            .verifyComplete();
+            
+        verify(supplierService).getSupplierWithRating(id);
     }
 }
