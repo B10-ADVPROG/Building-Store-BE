@@ -2,9 +2,9 @@ name: Continuous Integration (CI)
 
 on:
   push:
-    branches: [ manajemen-produk ]
+    branches: [ transaksi-penjualan-william ]
   pull_request:
-    branches: [ manajemen-produk ]
+    branches: [ transaksi-penjualan-william ]
 
 jobs:
   build:
