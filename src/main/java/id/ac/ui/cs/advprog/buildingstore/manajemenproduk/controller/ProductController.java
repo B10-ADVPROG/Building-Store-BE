@@ -56,7 +56,7 @@ public class ProductController {
     }
 
 
-    @GetMapping("/detail/{id}")
+    @GetMapping("/detail/{id}/")
     public ResponseEntity<Map<String, Object>> getProductDetail(@PathVariable String id, @RequestHeader("Authorization") String authHeader) {
         if (!isTokenValid(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
@@ -77,7 +77,7 @@ public class ProductController {
         }
     }
 
-    @PostMapping("/create")
+    @PostMapping("/create/")
     public ResponseEntity<Object> createProduct(@Valid @RequestBody CreateProductRequest requestBody, @RequestHeader("Authorization") String authHeader) {
         if (!isTokenValid(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
@@ -102,7 +102,7 @@ public class ProductController {
         }
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/edit/{id}/")
     public ResponseEntity<Map<String, String>> updateProduct(@PathVariable("id") String id, @RequestBody Map<String, Object> requestBody, @RequestHeader("Authorization") String authHeader) {
         if (!isTokenValid(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
@@ -134,7 +134,7 @@ public class ProductController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}/")
     public ResponseEntity<?> deleteProduct(@PathVariable String id, @RequestHeader("Authorization") String authHeader) {
         if (!isTokenValid(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
