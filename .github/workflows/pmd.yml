@@ -2,7 +2,7 @@ name: PMD
 on:
   push:
     branches:
-      - "manajemen-produk"
+      - "transaksi-penjualan-william"
   pull_request:
 jobs:
   sonarcloud:
