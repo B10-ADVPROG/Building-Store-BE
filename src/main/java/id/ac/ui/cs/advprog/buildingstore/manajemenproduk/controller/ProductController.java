@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.buildingstore.manajemenproduk.controller;
 
 
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.dto.CreateProductRequest;
+import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.dto.EditProductDTO;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.service.ProductService;
 import jakarta.validation.Valid;
@@ -103,7 +104,7 @@ public class ProductController {
     }
 
     @PutMapping("/edit/{id}/")
-    public ResponseEntity<Map<String, String>> updateProduct(@PathVariable("id") String id, @RequestBody Map<String, Object> requestBody, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Map<String, String>> updateProduct(@PathVariable("id") String id, @RequestBody EditProductDTO requestBody, @RequestHeader("Authorization") String authHeader) {
         if (!isTokenValid(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
@@ -115,10 +116,10 @@ public class ProductController {
                         .body(Map.of("message", "Product not found"));
             }
 
-            String name = (String) requestBody.get("newProductName");
-            String description = (String) requestBody.get("newProductDescription");
-            int price = Integer.parseInt(requestBody.get("newProductPrice").toString());
-            int stock = Integer.parseInt(requestBody.get("newProductStock").toString());
+            String name = (String) requestBody.getNewProductName();
+            String description = (String) requestBody.getNewProductDescription();
+            int price = requestBody.getNewProductPrice();
+            int stock = requestBody.getNewProductStock();
 
             existingProduct.setProductName(name);
             existingProduct.setProductDescription(description);
