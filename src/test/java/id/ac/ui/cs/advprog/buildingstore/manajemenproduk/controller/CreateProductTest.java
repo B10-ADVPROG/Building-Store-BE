@@ -52,8 +52,7 @@ public class CreateProductTest {
 
         when(productService.create(Mockito.any(Product.class))).thenReturn(product);
 
-        mockMvc.perform(post("/product/create/" +
-                        "")
+        mockMvc.perform(post("/product/create/")
                         .header("Authorization", validToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
