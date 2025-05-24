@@ -20,30 +20,35 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product create(Product product) {
-        return repository.create(product);
+        return repository.save(product);
     }
 
     @Override
     public List<Product> findAll() {
-        Iterator<Product> iterator = repository.findAll();
-        List<Product> result = new ArrayList<>();
-        iterator.forEachRemaining(result::add);
-        return result;
+        return repository.findAll();
     }
 
     @Override
     public Product findById(String id) {
-        return repository.findById(id);
+        return repository.findById(id).orElse(null);
     }
 
     @Override
     public Product update(String id, Product updatedProduct) {
-        return repository.update(id, updatedProduct);
+        Product existingProduct = repository.findById(id).orElse(null);
+        if (existingProduct != null) {
+            existingProduct.setProductName(updatedProduct.getProductName());
+            existingProduct.setProductDescription(updatedProduct.getProductDescription());
+            existingProduct.setProductPrice(updatedProduct.getProductPrice());
+            existingProduct.setProductStock(updatedProduct.getProductStock());
+            return repository.save(existingProduct);
+        }
+        return null;
     }
 
     @Override
     public void delete(String id) {
-        repository.delete(id);
+        repository.deleteById(id);
     }
 
 
