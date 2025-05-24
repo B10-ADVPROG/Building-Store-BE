@@ -40,7 +40,7 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Override
     public Flux<SupplierDTO> getAllSuppliers() {
-        return Flux.defer(() -> Flux.fromIterable(supplierRepository.findAll()))
+        return Flux.defer(() -> Flux.fromIterable(supplierRepository.findByActiveTrue()))
                 .map(supplierFactory::createSupplierDTO)
                 .subscribeOn(Schedulers.boundedElastic());
     }

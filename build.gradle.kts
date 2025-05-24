@@ -39,6 +39,7 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("io.projectreactor:reactor-test")
+    runtimeOnly("org.postgresql:postgresql")
 }
 
 tasks.register<Test>("unitTest") {
