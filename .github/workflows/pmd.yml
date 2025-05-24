@@ -2,7 +2,7 @@ name: PMD
 on:
   push:
     branches:
-      - "manajemen-produk"
+      - "staging"
   pull_request:
 jobs:
   sonarcloud:
