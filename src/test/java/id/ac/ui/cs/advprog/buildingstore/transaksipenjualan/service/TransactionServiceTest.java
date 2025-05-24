@@ -190,8 +190,27 @@ public class TransactionServiceTest {
         });
 
         verify(transactionRepository).deleteById(invalidId);
-
     }
+
+    @Test
+    void testDeleteTransactionRestoresProductStock() {
+        Map<Product, Integer> products = new HashMap<>();
+        products.put(product1, 2);
+        products.put(product2, 3);
+
+        SalesTransaction transaction = new SalesTransaction(products);
+        String id = transaction.getTransactionId();
+
+        when(transactionRepository.findById(id)).thenReturn(transaction);
+        doNothing().when(transactionRepository).deleteById(id);
+
+        transactionService.deleteById(id);
+
+        verify(productService).increaseStock(product1, 2);
+        verify(productService).increaseStock(product2, 3);
+        verify(transactionRepository).deleteById(id);
+    }
+
 
 
 
