@@ -5,13 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-@Getter
-@Setter
 public class SalesTransaction {
 
     public enum Status {
@@ -19,19 +14,27 @@ public class SalesTransaction {
         COMPLETED
     }
 
+    @Getter
     private String transactionId;
+    @Getter @Setter
     private Map<Product, Integer> products;
+    @Getter @Setter
     private Status status;
+    @Getter
     private LocalDateTime timestamp;
 
-    public SalesTransaction(Map<Product, Integer> product) {
-        this.products = Collections.unmodifiableMap(new LinkedHashMap<>(product));
+    public SalesTransaction(Map<Product, Integer> products) {
+        this.products = products;
         this.status = Status.IN_PROGRESS;
         this.transactionId = UUID.randomUUID().toString();
         this.timestamp = LocalDateTime.now();
     }
 
     public SalesTransaction() {
+        this.products = new HashMap<>();
+        this.status = Status.IN_PROGRESS;
+        this.transactionId = UUID.randomUUID().toString();
+        this.timestamp = LocalDateTime.now();
     }
 
 

@@ -66,4 +66,10 @@ public class SalesTransactionTest {
         SalesTransaction t = new SalesTransaction(transaction.getProducts());
         assertEquals(SalesTransaction.Status.IN_PROGRESS, t.getStatus());
     }
+
+    @Test
+    void testDefaultProgressWithNoArgConstructor() {
+        SalesTransaction t = new SalesTransaction();
+        assertEquals(SalesTransaction.Status.IN_PROGRESS, t.getStatus());
+    }
 }
