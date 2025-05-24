@@ -79,15 +79,24 @@ public class ProductServiceTest {
 
     @Test
     void testEditProduct() {
+        // Setup
         when(productRepository.findById(product1.getProductId())).thenReturn(Optional.of(product1));
-        when(productRepository.save(any(Product.class))).thenReturn(product2);
+
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
+            Product savedProduct = invocation.getArgument(0);
+            return savedProduct;
+        });
 
         Product updatedProduct = service.update(product1.getProductId(), product2);
 
         assertNotNull(updatedProduct);
         assertEquals(product2.getProductName(), updatedProduct.getProductName());
+        assertEquals(product2.getProductDescription(), updatedProduct.getProductDescription());
+        assertEquals(product2.getProductPrice(), updatedProduct.getProductPrice());
+        assertEquals(product2.getProductStock(), updatedProduct.getProductStock());
+
         verify(productRepository, times(1)).findById(product1.getProductId());
-        verify(productRepository, times(1)).save(product2);
+        verify(productRepository, times(1)).save(any(Product.class));
     }
 
     @Test

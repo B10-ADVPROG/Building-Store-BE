@@ -35,6 +35,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product update(String id, Product updatedProduct) {
+        if (updatedProduct == null) {
+            throw new IllegalArgumentException("Updated product cannot be null");
+        }
+
         Product existingProduct = repository.findById(id).orElse(null);
         if (existingProduct != null) {
             existingProduct.setProductName(updatedProduct.getProductName());
