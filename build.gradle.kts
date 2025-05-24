@@ -3,6 +3,13 @@ plugins {
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
     id("jacoco")
+    id("pmd")
+}
+
+pmd {
+    toolVersion = "7.10.0"
+    ruleSetFiles = files("pmd/ruleset.xml")
+    isIgnoreFailures = true
 }
 
 group = "id.ac.ui.cs.advprog"
@@ -25,9 +32,16 @@ repositories {
 }
 
 dependencies {
+<<<<<<< HEAD
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+=======
+    implementation("org.postgresql:postgresql")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("io.jsonwebtoken:jjwt:0.2")
+>>>>>>> manajemen-produk
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("com.h2database:h2")
@@ -68,4 +82,12 @@ tasks.jacocoTestReport {
 		html.required = true
 		xml.required = true
 	}
+}
+
+tasks.withType<Pmd>().configureEach {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+    ignoreFailures = true
 }
