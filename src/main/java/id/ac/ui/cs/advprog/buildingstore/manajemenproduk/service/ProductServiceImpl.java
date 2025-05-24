@@ -54,6 +54,10 @@ public class ProductServiceImpl implements ProductService {
         product.setProductStock(product.getProductStock() - quantity);
     }
 
+    @Override
+    public void increaseStock(Product product, int quantity) {
+        product.setProductStock(product.getProductStock() + quantity);
+    }
 
 
 }

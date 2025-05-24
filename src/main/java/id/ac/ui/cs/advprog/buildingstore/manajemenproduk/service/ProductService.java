@@ -11,4 +11,5 @@ public interface ProductService {
     public Product update(String id, Product product);
     public void delete(String id);
     public void reduceStock(Product product, int quantity);
+    public void increaseStock(Product product, int quantity);
 }

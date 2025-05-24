@@ -38,6 +38,15 @@ public class TransactionService {
     }
 
     public void deleteById(String id) {
+        SalesTransaction transaction = transactionRepository.findById(id);
+        if (transaction == null) {
+            throw new IllegalArgumentException("Transaction with id " + id + " not found");
+        }
+
+        transaction.getProducts().forEach((product, quantity) -> {
+            productService.increaseStock(product, (int) quantity);
+        });
+
         transactionRepository.deleteById(id);
     }
 

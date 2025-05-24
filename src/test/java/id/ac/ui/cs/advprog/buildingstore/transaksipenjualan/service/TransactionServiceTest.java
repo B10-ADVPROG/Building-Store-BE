@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -172,24 +173,31 @@ public class TransactionServiceTest {
         SalesTransaction t = new SalesTransaction(products);
         String id = t.getTransactionId();
 
-        SalesTransaction savedTransaction = transactionService.create(t);
+        when(transactionRepository.save(t)).thenReturn(t);
+        when(transactionRepository.findById(id)).thenReturn(t);
+        doNothing().when(transactionRepository).deleteById(id);
+        when(transactionRepository.findAll()).thenReturn(new ArrayList<>());
+
+        transactionService.create(t);
         transactionService.deleteById(id);
 
         assertEquals(0, transactionService.findAll().size());
+        verify(transactionRepository).deleteById(id);
     }
 
     @Test
     void testDeleteWithInvalidId() {
         String invalidId = "non-existent-id";
 
-        doThrow(new IllegalArgumentException("Transaction not found"))
-                .when(transactionRepository).deleteById(invalidId);
+        when(transactionRepository.findById(invalidId)).thenReturn(null);
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
             transactionService.deleteById(invalidId);
         });
 
-        verify(transactionRepository).deleteById(invalidId);
+        assertEquals("Transaction with id " + invalidId + " not found", thrown.getMessage());
+
+        verify(transactionRepository, never()).deleteById(anyString());
     }
 
     @Test
@@ -204,14 +212,15 @@ public class TransactionServiceTest {
         when(transactionRepository.findById(id)).thenReturn(transaction);
         doNothing().when(transactionRepository).deleteById(id);
 
+        doNothing().when(productService).increaseStock(product1, 2);
+        doNothing().when(productService).increaseStock(product2, 3);
+
         transactionService.deleteById(id);
 
         verify(productService).increaseStock(product1, 2);
         verify(productService).increaseStock(product2, 3);
         verify(transactionRepository).deleteById(id);
     }
-
-
 
 
 
