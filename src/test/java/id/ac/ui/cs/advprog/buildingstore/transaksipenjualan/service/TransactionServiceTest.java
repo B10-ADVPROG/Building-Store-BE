@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +47,7 @@ public class TransactionServiceTest {
 
     @Test
     void testCreateTransactionAndReduceStock() {
-        Map<Product, Integer> products = new LinkedHashMap<>();
+        Map<Product, Integer> products = new HashMap<>();
         products.put(product1, 2);
         products.put(product2, 3);
 
@@ -71,7 +71,7 @@ public class TransactionServiceTest {
         doThrow(new IllegalArgumentException("Stok tidak cukup"))
                 .when(productService).reduceStock(product1, 1000);
 
-        Map<Product, Integer> products = new LinkedHashMap<>();
+        Map<Product, Integer> products = new HashMap<>();
         products.put(product1, 1000);
 
         SalesTransaction transaction = new SalesTransaction(products);
@@ -122,7 +122,7 @@ public class TransactionServiceTest {
 
     @Test
     void testUpdateStatusValid() {
-        Map<Product, Integer> products = new LinkedHashMap<>();
+        Map<Product, Integer> products = new HashMap<>();
         products.put(product1, 1);
 
         SalesTransaction transaction = new SalesTransaction(products);
@@ -146,11 +146,11 @@ public class TransactionServiceTest {
 
     @Test
     void testUpdateStatusInvalid() {
-        Map<Product, Integer> products = new LinkedHashMap<>();
+        Map<Product, Integer> products = new HashMap<>();
         products.put(product1, 1);
 
         SalesTransaction transaction = new SalesTransaction(products);
-        transaction.setStatus(SalesTransaction.Status.COMPLETED); // sudah completed
+        transaction.setStatus(SalesTransaction.Status.COMPLETED);
         String id = transaction.getTransactionId();
 
         when(transactionRepository.findById(id)).thenReturn(transaction);
@@ -165,7 +165,33 @@ public class TransactionServiceTest {
     }
 
 
+    @Test
+    void testDeleteTransaction() {
+        Map<Product, Integer> products = new HashMap<>();
+        products.put(product1, 1);
+        SalesTransaction t = new SalesTransaction(products);
+        String id = t.getTransactionId();
 
+        SalesTransaction savedTransaction = transactionService.create(t);
+        transactionService.deleteById(id);
+
+        assertEquals(0, transactionService.findAll().size());
+    }
+
+    @Test
+    void testDeleteWithInvalidId() {
+        String invalidId = "non-existent-id";
+
+        doThrow(new IllegalArgumentException("Transaction not found"))
+                .when(transactionRepository).deleteById(invalidId);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            transactionService.deleteById(invalidId);
+        });
+
+        verify(transactionRepository).deleteById(invalidId);
+
+    }
 
 
 

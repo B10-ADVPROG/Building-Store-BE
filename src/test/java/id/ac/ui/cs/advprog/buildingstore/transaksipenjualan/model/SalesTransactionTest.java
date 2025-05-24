@@ -60,4 +60,10 @@ public class SalesTransactionTest {
         transaction.setStatus(SalesTransaction.Status.COMPLETED);
         assertEquals(SalesTransaction.Status.COMPLETED, transaction.getStatus());
     }
+
+    @Test
+    void testDefaultProgress() {
+        SalesTransaction t = new SalesTransaction(transaction.getProducts());
+        assertEquals(SalesTransaction.Status.IN_PROGRESS, t.getStatus());
+    }
 }
