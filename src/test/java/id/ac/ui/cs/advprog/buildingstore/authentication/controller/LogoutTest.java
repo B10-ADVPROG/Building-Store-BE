@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
+import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthorizationService;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class LogoutTest {
 
     @MockitoBean
     private JwtService jwtService;
+
+    @MockitoBean
+    private AuthorizationService authorizationService;
 
     @Autowired
     private ObjectMapper objectMapper;
