@@ -1,22 +1,64 @@
 package id.ac.ui.cs.advprog.buildingstore.authentication.service;
 
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.stereotype.Service;
-import java.util.Date;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+import java.util.*;
+import java.util.Date;
 
 @Service
 public class JwtService {
+    private final SecretKey secretKey;
+    private final Set<String> invalidatedTokens = new HashSet<>();
 
-    private String secretKey = "Y29uZ3JhdHVsYXRpb25zdHJvbmdwZXJzZXZlbnRvcm5m5ybW8aGVg=";
+    public JwtService() {
+        byte[] keyBytes = "Y29uZ3JhdHVsYXRpb25zdHJvbmdwZXJzZXZlbnRvcm5m5ybW8aGVg=".getBytes();
+        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+    }
 
     public String generateToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getEmail())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours expiration
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .subject(user.getEmail())
+                .claim("role", user.getRole())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .signWith(secretKey, Jwts.SIG.HS256)
                 .compact();
+    }
+
+    public String extractRole(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("role", String.class);
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            synchronized(invalidatedTokens) {
+                return !invalidatedTokens.contains(token) &&
+                        claims.getExpiration().after(new Date());
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void invalidateToken(String token) {
+        synchronized(invalidatedTokens) {
+            invalidatedTokens.add(token);
+        }
     }
 }

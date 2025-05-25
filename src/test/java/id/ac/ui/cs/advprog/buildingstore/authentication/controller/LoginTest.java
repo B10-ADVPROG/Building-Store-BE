@@ -9,6 +9,7 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.factory.UserFactoryTest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.Kasir;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
+import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthorizationService;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,9 @@ public class LoginTest {
 
     @MockitoBean
     private JwtService jwtService;
+
+    @MockitoBean
+    private AuthorizationService authorizationService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

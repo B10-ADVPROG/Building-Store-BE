@@ -2,9 +2,9 @@ name: CI - Build & Test
 
 on:
   push:
-    branches: [ staging ]
+    branches: [ staging, auth, manajemen-produk ]
   pull_request:
-    branches: [ staging ]
+    branches: [ staging, auth, manajemen-produk ]
 
 jobs:
   build:
@@ -38,4 +38,3 @@ jobs:
           DATABASE_USER: ${{ secrets.DATABASE_USER }}
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-
