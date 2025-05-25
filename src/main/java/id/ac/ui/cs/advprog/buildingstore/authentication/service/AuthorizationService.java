@@ -14,12 +14,14 @@ public class AuthorizationService {
 
     public boolean authorizeAdmin(String token) {
         if (!jwtService.isTokenValid(token)) {
+            System.out.println("Token invalid");
             return false;
         }
         try {
             String role = jwtService.extractRole(token);
-            return ROLE_ADMIN.equals(role);
+            return ROLE_ADMIN.equals(role.toLowerCase());
         } catch (Exception e) {
+            System.out.println("Failed to extract role");
             return false;
         }
     }
@@ -30,7 +32,7 @@ public class AuthorizationService {
         }
         try {
             String role = jwtService.extractRole(token);
-            return ROLE_KASIR.equals(role);
+            return ROLE_KASIR.equals(role.toLowerCase());
         } catch (Exception e) {
             return false;
         }

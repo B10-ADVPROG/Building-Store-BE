@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemenproduk.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthorizationService;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.dto.CreateProductRequest;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.service.ProductService;
@@ -12,16 +13,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@TestPropertySource(properties = {"auth.enabled=false"})
 @ActiveProfiles("test")
 @WebMvcTest(ProductController.class)
 public class CreateProductTest {
@@ -35,11 +39,11 @@ public class CreateProductTest {
     @MockitoBean
     private ProductService productService;
 
+
     private String validToken;
 
     @BeforeEach
-    public void setUp() {
-        validToken = "Bearer Token";
+    public void setup() {
     }
 
     @Test

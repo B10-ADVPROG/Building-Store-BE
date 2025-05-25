@@ -1,18 +1,23 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemenproduk.controller;
 
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.dto.AuthorizationRequest;
+import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthorizationService;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.dto.CreateProductRequest;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.dto.EditProductDTO;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.Duration;
 import java.util.*;
 
 @RestController
@@ -22,20 +27,24 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    private boolean isTokenValid(String header) {
-        if (header == null || !header.startsWith("Bearer ")) return false;
-        String token = header.substring(7);
-//        return jwtService.isTokenValid(token);
-        // For simplicity
-        return token.equals("Token");
+    private final WebClient authWebClient;
+
+    @Value("${auth.enabled:true}")
+    private boolean authEnabled;
+
+    public ProductController(ProductService productService,
+                             WebClient.Builder webClientBuilder,
+                             @Value("${auth.service.base-url:http://localhost:8080}") String authServiceBaseUrl) {
+        this.productService = productService;
+        this.authWebClient = webClientBuilder
+                .baseUrl(authServiceBaseUrl)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
     }
+
 
     @GetMapping("/")
     public ResponseEntity<Object> allProducts(@RequestHeader(value = "Authorization", required = false) String authHeader) {
-        if (!isTokenValid(authHeader)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
-        }
-
         List<Product> products = productService.findAll();
         List<Map<String, Object>> response = new ArrayList<>();
 
@@ -59,7 +68,7 @@ public class ProductController {
 
     @GetMapping("/detail/{id}/")
     public ResponseEntity<Map<String, Object>> getProductDetail(@PathVariable String id, @RequestHeader("Authorization") String authHeader) {
-        if (!isTokenValid(authHeader)) {
+        if (!isAuthorizedAsAdmin(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
 
@@ -80,7 +89,7 @@ public class ProductController {
 
     @PostMapping("/create/")
     public ResponseEntity<Object> createProduct(@Valid @RequestBody CreateProductRequest requestBody, @RequestHeader("Authorization") String authHeader) {
-        if (!isTokenValid(authHeader)) {
+        if (!isAuthorizedAsAdmin(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
 
@@ -105,7 +114,7 @@ public class ProductController {
 
     @PutMapping("/edit/{id}/")
     public ResponseEntity<Map<String, String>> updateProduct(@PathVariable("id") String id, @RequestBody EditProductDTO requestBody, @RequestHeader("Authorization") String authHeader) {
-        if (!isTokenValid(authHeader)) {
+        if (!isAuthorizedAsAdmin(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
 
@@ -137,7 +146,7 @@ public class ProductController {
 
     @DeleteMapping("/delete/{id}/")
     public ResponseEntity<?> deleteProduct(@PathVariable String id, @RequestHeader("Authorization") String authHeader) {
-        if (!isTokenValid(authHeader)) {
+        if (!isAuthorizedAsAdmin(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
         }
         try {
@@ -148,5 +157,31 @@ public class ProductController {
         }
     }
 
+    private boolean isAuthorizedAsAdmin(String authHeader) {
+        if (!authEnabled) {
+            return true;
+        }
+
+        AuthorizationRequest requestBody = new AuthorizationRequest();
+        requestBody.setToken(authHeader.substring(7));
+
+        try {
+            ResponseEntity<Map<String, Object>> response = authWebClient.post()
+                    .uri("/auth-admin/")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .toEntity(new ParameterizedTypeReference<Map<String, Object>>() {})
+                    .block(Duration.ofSeconds(3));
+
+            return response != null &&
+                    response.getStatusCode() == HttpStatus.OK &&
+                    response.getBody() != null &&
+                    "Authorized as administrator".equals(response.getBody().get("message"));
+        } catch (Exception e) {
+            System.err.println("Admin authorization error: " + e.getMessage());
+            return false;
+        }
+    }
 
 }
