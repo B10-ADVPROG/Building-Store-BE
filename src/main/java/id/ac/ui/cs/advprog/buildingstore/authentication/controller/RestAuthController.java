@@ -133,7 +133,7 @@ public class RestAuthController {
         }
     }
 
-    @GetMapping("/auth-admin/")
+    @PostMapping("/auth-admin/")
     public ResponseEntity<Map<String, Object>> authorizeAdmin(@Valid @RequestBody AuthorizationRequest request) {
         boolean authorized = authorizationService.authorizeAdmin(request.getToken());
 
@@ -145,7 +145,7 @@ public class RestAuthController {
         }
     }
 
-    @GetMapping("/auth-kasir/")
+    @PostMapping("/auth-kasir/")
     public ResponseEntity<Map<String, Object>> authorizeKasir(@Valid @RequestBody AuthorizationRequest request) {
         boolean authorized = authorizationService.authorizeKasir(request.getToken());
 
