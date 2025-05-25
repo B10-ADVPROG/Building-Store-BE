@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.authentication.controller;
 
+import id.ac.ui.cs.advprog.buildingstore.authentication.dto.AuthorizationRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.LoginRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.dto.RegisterRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.factory.AdminFactory;
@@ -7,6 +8,7 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.factory.KasirFactory;
 import id.ac.ui.cs.advprog.buildingstore.authentication.factory.UserFactory;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
+import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthorizationService;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.JwtService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +28,13 @@ import java.util.stream.Collectors;
 public class RestAuthController {
     private final AuthService authService;
     private final JwtService jwtService;
+    private final AuthorizationService authorizationService;
 
     @Autowired
-    public RestAuthController(AuthService authService, JwtService jwtService) {
+    public RestAuthController(AuthService authService, JwtService jwtService, AuthorizationService authorizationService) {
         this.authService = authService;
         this.jwtService = jwtService;
+        this.authorizationService = authorizationService;
     }
 
 
@@ -127,6 +131,31 @@ public class RestAuthController {
                     .body(Map.of("error", "An error occurred during logout: " + e.getMessage()));
         }
     }
+
+    @PostMapping("/auth-admin/")
+    public ResponseEntity<Map<String, Object>> authorizeAdmin(@Valid @RequestBody AuthorizationRequest request) {
+        boolean authorized = authorizationService.authorizeAdmin(request.getToken());
+
+        if (authorized) {
+            return ResponseEntity.ok(Map.of("message", "Authorized as administrator"));
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Not authorized as administrator"));
+        }
+    }
+
+    @PostMapping("/auth-kasir/")
+    public ResponseEntity<Map<String, Object>> authorizeKasir(@Valid @RequestBody AuthorizationRequest request) {
+        boolean authorized = authorizationService.authorizeKasir(request.getToken());
+
+        if (authorized) {
+            return ResponseEntity.ok(Map.of("message", "Authorized as kasir"));
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Not authorized as kasir"));
+        }
+    }
+
 
     private UserFactory getUserFactory(String role) {
         switch (role.toLowerCase()) {
