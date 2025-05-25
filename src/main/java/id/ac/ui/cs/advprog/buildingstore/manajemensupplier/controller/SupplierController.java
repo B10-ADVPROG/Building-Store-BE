@@ -22,6 +22,11 @@ public class SupplierController {
         this.supplierService = supplierService;
     }
 
+    @PostMapping
+    public Mono<SupplierDTO> createSupplier(@RequestBody SupplierDTO supplierDTO) {
+        return supplierService.createSupplier(supplierDTO);
+    }
+
     @GetMapping
     public Flux<SupplierDTO> getAllSuppliers() {
         return supplierService.getAllSuppliers();
@@ -34,11 +39,6 @@ public class SupplierController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public Mono<SupplierDTO> createSupplier(@RequestBody SupplierDTO supplierDTO) {
-        return supplierService.createSupplier(supplierDTO);
-    }
-
     @PutMapping("/{id}")
     public Mono<ResponseEntity<SupplierDTO>> updateSupplier(@PathVariable UUID id, @RequestBody SupplierDTO supplierDTO) {
         return supplierService.updateSupplier(id, supplierDTO)
@@ -49,7 +49,14 @@ public class SupplierController {
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<Void>> deleteSupplier(@PathVariable UUID id) {
         return supplierService.deleteSupplier(id)
-                .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorReturn(IllegalArgumentException.class, ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/rating")
+    public Mono<ResponseEntity<SupplierDTO>> getSupplierWithRating(@PathVariable UUID id) {
+        return supplierService.getSupplierWithRating(id)
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

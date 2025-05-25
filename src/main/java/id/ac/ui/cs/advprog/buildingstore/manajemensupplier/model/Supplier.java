@@ -1,37 +1,40 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemensupplier.model;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import jakarta.persistence.*;
 import java.util.UUID;
 
-@Entity
-@Table(name = "suppliers")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "suppliers")
 public class Supplier {
-    
     @Id
-    private UUID id;  // Remove @GeneratedValue since we're setting IDs manually
-    
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
     @Column(nullable = false)
     private String name;
-    
-    @Column(name = "contact_person")
-    private String contactPerson;
-    
-    private String phone;
-    
-    private String email;
-    
-    private String address;
-    
+
     @Column(nullable = false)
+    private String contactPerson;
+
+    @Column(nullable = false)
+    private String phone;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String address;
+
+    @Builder.Default
     private boolean active = true;
 
     @PrePersist

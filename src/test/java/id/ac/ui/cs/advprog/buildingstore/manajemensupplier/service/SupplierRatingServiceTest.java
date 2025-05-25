@@ -1,54 +1,79 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemensupplier.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("test")
 class SupplierRatingServiceTest {
+
+    private SupplierRatingService service;
+    private WebClient webClient;
+
+    @BeforeEach
+    void setUp() {
+        webClient = mock(WebClient.class, RETURNS_DEEP_STUBS);
+        String baseUrl = "https://api.example.com";
+        service = new SupplierRatingService(webClient, baseUrl);
+    }
 
     @Test
     void testGetSupplierRating() {
-        WebClient webClient = mock(WebClient.class, RETURNS_DEEP_STUBS);
-        String baseUrl = "https://api.example.com";
-        SupplierRatingService service = new SupplierRatingService(webClient, baseUrl);
-
         when(webClient.get().uri(any(String.class)).retrieve().bodyToMono(Double.class))
                 .thenReturn(Mono.just(4.5));
 
-        Double result = service.getSupplierRating("SupplierA").block();
+        Mono<Double> result = service.getSupplierRating("SupplierA");
 
-        assertEquals(4.5, result);
+        StepVerifier.create(result)
+                .expectNext(4.5)
+                .verifyComplete();
     }
 
     @Test
     void testGetSupplierRatingWithNullName() {
-        WebClient webClient = mock(WebClient.class, RETURNS_DEEP_STUBS);
-        String baseUrl = "https://api.example.com";
-        SupplierRatingService service = new SupplierRatingService(webClient, baseUrl);
+        Mono<Double> result = service.getSupplierRating(null);
 
-        when(webClient.get().uri(any(String.class)).retrieve().bodyToMono(Double.class))
-                .thenReturn(Mono.just(0.0));
+        StepVerifier.create(result)
+                .expectError(IllegalArgumentException.class)
+                .verify();
+    }
 
-        Double result = service.getSupplierRating(null).block();
+    @Test
+    void testGetSupplierRatingWithEmptyName() {
+        Mono<Double> result = service.getSupplierRating("");
 
-        assertEquals(0.0, result);
+        StepVerifier.create(result)
+                .expectError(IllegalArgumentException.class)
+                .verify();
     }
 
     @Test
     void testGetSupplierRatingHandlesError() {
-        WebClient webClient = mock(WebClient.class, RETURNS_DEEP_STUBS);
-        String baseUrl = "https://api.example.com";
-        SupplierRatingService service = new SupplierRatingService(webClient, baseUrl);
-
         when(webClient.get().uri(any(String.class)).retrieve().bodyToMono(Double.class))
                 .thenReturn(Mono.error(new RuntimeException("API error")));
 
-        assertThrows(RuntimeException.class, () -> {
-            service.getSupplierRating("SupplierA").block();
-        });
+        Mono<Double> result = service.getSupplierRating("SupplierA");
+
+        StepVerifier.create(result)
+                .expectNext(0.0) // Should return default value on error
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetSupplierRatingWithValidName() {
+        when(webClient.get().uri(any(String.class)).retrieve().bodyToMono(Double.class))
+                .thenReturn(Mono.just(3.8));
+
+        Mono<Double> result = service.getSupplierRating("ABC Building Supplies");
+
+        StepVerifier.create(result)
+                .expectNext(3.8)
+                .verifyComplete();
     }
 }
