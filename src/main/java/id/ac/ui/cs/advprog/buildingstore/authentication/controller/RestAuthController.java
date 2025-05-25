@@ -11,6 +11,7 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthService;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthorizationService;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.JwtService;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -132,7 +133,7 @@ public class RestAuthController {
         }
     }
 
-    @PostMapping("/auth-admin/")
+    @GetMapping("/auth-admin/")
     public ResponseEntity<Map<String, Object>> authorizeAdmin(@Valid @RequestBody AuthorizationRequest request) {
         boolean authorized = authorizationService.authorizeAdmin(request.getToken());
 
@@ -144,7 +145,7 @@ public class RestAuthController {
         }
     }
 
-    @PostMapping("/auth-kasir/")
+    @GetMapping("/auth-kasir/")
     public ResponseEntity<Map<String, Object>> authorizeKasir(@Valid @RequestBody AuthorizationRequest request) {
         boolean authorized = authorizationService.authorizeKasir(request.getToken());
 
