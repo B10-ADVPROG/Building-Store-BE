@@ -1,17 +1,12 @@
 package id.ac.ui.cs.advprog.buildingstore;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
-@ActiveProfiles("test")
-@TestPropertySource(properties = {
-    "spring.datasource.url=jdbc:h2:mem:testdb",
-    "spring.jpa.hibernate.ddl-auto=create-drop",
-    "management.endpoints.enabled-by-default=false"
-})
+@AutoConfigureTestDatabase(replace = Replace.ANY)
 class BuildingStoreApplicationTests {
 
     @Test

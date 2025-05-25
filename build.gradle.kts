@@ -1,7 +1,7 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.4.4"
-    id("io.spring.dependency-management") version "1.1.7"
+    id("org.springframework.boot") version "3.2.3" // Updated version
+    id("io.spring.dependency-management") version "1.1.4"
     id("jacoco")
 }
 
@@ -31,13 +31,20 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     
     // Monitoring dependencies
+    implementation(platform("io.micrometer:micrometer-bom:1.12.3"))
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.micrometer:micrometer-core")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.micrometer:micrometer-observation")
+    
+    // Add these if you're using Spring Boot 3.x
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("io.zipkin.reporter2:zipkin-reporter-brave")
     
     // Database
     runtimeOnly("com.h2database:h2")
     runtimeOnly("org.postgresql:postgresql")
+    testImplementation("com.h2database:h2")
     
     // Lombok
     compileOnly("org.projectlombok:lombok")
