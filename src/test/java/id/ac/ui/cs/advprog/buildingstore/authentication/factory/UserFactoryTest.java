@@ -4,9 +4,11 @@ import id.ac.ui.cs.advprog.buildingstore.authentication.model.Administrator;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.Kasir;
 import id.ac.ui.cs.advprog.buildingstore.authentication.model.User;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ActiveProfiles("test")
 public class UserFactoryTest {
 
     @Test

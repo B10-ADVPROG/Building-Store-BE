@@ -2,7 +2,7 @@ name: PMD
 on:
   push:
     branches:
-      - "auth"
+      - "staging"
   pull_request:
 jobs:
   sonarcloud:
@@ -20,4 +20,3 @@ jobs:
           version: '7.10.0'
           sourcePath: 'src/main/java'
           rulesets: 'pmd/ruleset.xml'
-
