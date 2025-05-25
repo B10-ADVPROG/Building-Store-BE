@@ -1,7 +1,7 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.2.3" // Updated version
-    id("io.spring.dependency-management") version "1.1.4"
+    id("org.springframework.boot") version "3.4.4"  // Using newer version
+    id("io.spring.dependency-management") version "1.1.7"  // Using newer version
     id("jacoco")
     id("pmd")
 }
@@ -32,33 +32,22 @@ repositories {
 }
 
 dependencies {
-    implementation("org.postgresql:postgresql")
+    // Spring Boot core
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    
+    // JWT dependencies
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     implementation("io.jsonwebtoken:jjwt-impl:0.12.6")
     implementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    runtimeOnly("org.postgresql:postgresql")
-    compileOnly("org.projectlombok:lombok")
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-    
-    // Monitoring dependencies
-    implementation(platform("io.micrometer:micrometer-bom:1.12.3"))
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("io.micrometer:micrometer-core")
-    implementation("io.micrometer:micrometer-registry-prometheus")
-    implementation("io.micrometer:micrometer-observation")
-    
-    // Add these if you're using Spring Boot 3.x
-    implementation("io.micrometer:micrometer-tracing-bridge-brave")
-    implementation("io.zipkin.reporter2:zipkin-reporter-brave")
     
     // Database
-    runtimeOnly("com.h2database:h2")
+    implementation("org.postgresql:postgresql")
     runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("com.h2database:h2")
     testImplementation("com.h2database:h2")
     
     // Lombok
@@ -66,12 +55,19 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-    testImplementation("com.h2database:h2")
     
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    
+    // Monitoring dependencies
+    implementation(platform("io.micrometer:micrometer-bom:1.12.3"))
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-core")
+    implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("io.micrometer:micrometer-observation")
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("io.zipkin.reporter2:zipkin-reporter-brave")
     
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -79,6 +75,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+// Tasks
 tasks.register<Test>("unitTest") {
     description = "Run unit tests."
     group = "verification"
@@ -99,12 +96,12 @@ tasks.test {
 }
 
 tasks.jacocoTestReport {
-	dependsOn(tasks.test)
+    dependsOn(tasks.test)
 
-	reports {
-		html.required = true
-		xml.required = true
-	}
+    reports {
+        html.required = true
+        xml.required = true
+    }
 }
 
 tasks.withType<Pmd>().configureEach {
@@ -113,9 +110,4 @@ tasks.withType<Pmd>().configureEach {
         html.required.set(true)
     }
     ignoreFailures = true
-    dependsOn(tasks.test)
-    reports {
-        html.required = true
-        xml.required = true
-    }
 }
