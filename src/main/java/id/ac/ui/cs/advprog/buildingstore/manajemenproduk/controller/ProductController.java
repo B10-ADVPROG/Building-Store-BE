@@ -125,10 +125,10 @@ public class ProductController {
                         .body(Map.of("message", "Product not found"));
             }
 
-            String name = (String) requestBody.getNewProductName();
-            String description = (String) requestBody.getNewProductDescription();
-            int price = requestBody.getNewProductPrice();
-            int stock = requestBody.getNewProductStock();
+            String name = (String) requestBody.getProductName();
+            String description = (String) requestBody.getProductDescription();
+            int price = requestBody.getProductPrice();
+            int stock = requestBody.getProductStock();
 
             existingProduct.setProductName(name);
             existingProduct.setProductDescription(description);
