@@ -1,0 +1,29 @@
+name: Debug Database Secrets
+
+on:
+  push:
+    branches:
+      - staging
+  pull_request:
+    branches:
+      - staging
+
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check that database secrets are set (safe debug)
+        run: |
+          echo "DATABASE_HOST is ${DATABASE_HOST:+✅ SET}"
+          echo "DATABASE_USER is ${DATABASE_USER:+✅ SET}"
+          echo "DATABASE_NAME is ${DATABASE_NAME:+✅ SET}"
+          echo "DATABASE_PASSWORD is ${DATABASE_PASSWORD:+✅ SET}"
+        env:
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
