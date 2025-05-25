@@ -5,12 +5,14 @@ import id.ac.ui.cs.advprog.buildingstore.manajemensupplier.service.SupplierServi
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/suppliers")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class SupplierController {
 
     private final SupplierService supplierService;
@@ -21,32 +23,40 @@ public class SupplierController {
     }
 
     @PostMapping
-    public ResponseEntity<SupplierDTO> createSupplier(@RequestBody SupplierDTO supplierDTO) {
-        SupplierDTO createdSupplier = supplierService.createSupplier(supplierDTO);
-        return ResponseEntity.ok(createdSupplier);
+    public Mono<SupplierDTO> createSupplier(@RequestBody SupplierDTO supplierDTO) {
+        return supplierService.createSupplier(supplierDTO);
     }
 
     @GetMapping
-    public ResponseEntity<List<SupplierDTO>> getAllSuppliers() {
-        List<SupplierDTO> suppliers = supplierService.getAllSuppliers();
-        return ResponseEntity.ok(suppliers);
+    public Flux<SupplierDTO> getAllSuppliers() {
+        return supplierService.getAllSuppliers();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SupplierDTO> getSupplierById(@PathVariable UUID id) {
-        SupplierDTO supplier = supplierService.getSupplierById(id);
-        return ResponseEntity.ok(supplier);
+    public Mono<ResponseEntity<SupplierDTO>> getSupplierById(@PathVariable UUID id) {
+        return supplierService.getSupplierById(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SupplierDTO> updateSupplier(@PathVariable UUID id, @RequestBody SupplierDTO supplierDTO) {
-        SupplierDTO updatedSupplier = supplierService.updateSupplier(id, supplierDTO);
-        return ResponseEntity.ok(updatedSupplier);
+    public Mono<ResponseEntity<SupplierDTO>> updateSupplier(@PathVariable UUID id, @RequestBody SupplierDTO supplierDTO) {
+        return supplierService.updateSupplier(id, supplierDTO)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSupplier(@PathVariable UUID id) {
-        supplierService.deleteSupplier(id);
-        return ResponseEntity.noContent().build();
+    public Mono<ResponseEntity<Void>> deleteSupplier(@PathVariable UUID id) {
+        return supplierService.deleteSupplier(id)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .onErrorReturn(IllegalArgumentException.class, ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/rating")
+    public Mono<ResponseEntity<SupplierDTO>> getSupplierWithRating(@PathVariable UUID id) {
+        return supplierService.getSupplierWithRating(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

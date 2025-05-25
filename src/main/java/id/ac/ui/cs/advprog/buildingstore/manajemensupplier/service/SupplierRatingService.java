@@ -10,20 +10,23 @@ import reactor.core.publisher.Mono;
 public class SupplierRatingService {
 
     private final WebClient webClient;
-    private final String ratingApiBaseUrl;
+    private final String baseUrl;
 
     @Autowired
-    public SupplierRatingService(WebClient webClient,
-                                @Value("${supplier.rating.api.base-url:https://api.example.com}") String ratingApiBaseUrl) {
+    public SupplierRatingService(WebClient webClient, @Value("${supplier.rating.api.url:https://api.example.com}") String baseUrl) {
         this.webClient = webClient;
-        this.ratingApiBaseUrl = ratingApiBaseUrl;
+        this.baseUrl = baseUrl;
     }
 
     public Mono<Double> getSupplierRating(String supplierName) {
-        String url = String.format("%s/supplier-rating?name=%s", ratingApiBaseUrl, supplierName);
+        if (supplierName == null || supplierName.trim().isEmpty()) {
+            return Mono.error(new IllegalArgumentException("Supplier name cannot be null or empty"));
+        }
+
         return webClient.get()
-                .uri(url)
+                .uri(baseUrl + "/ratings/" + supplierName)
                 .retrieve()
-                .bodyToMono(Double.class);
+                .bodyToMono(Double.class)
+                .onErrorReturn(0.0); // Default rating if service fails
     }
 }

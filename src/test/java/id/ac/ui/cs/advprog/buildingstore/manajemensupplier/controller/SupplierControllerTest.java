@@ -7,10 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
@@ -42,56 +44,112 @@ class SupplierControllerTest {
 
     @Test
     void testCreateSupplier() {
-        when(supplierService.createSupplier(any(SupplierDTO.class))).thenReturn(supplierDTO);
+        when(supplierService.createSupplier(any(SupplierDTO.class))).thenReturn(Mono.just(supplierDTO));
 
-        ResponseEntity<SupplierDTO> response = supplierController.createSupplier(supplierDTO);
+        Mono<SupplierDTO> result = supplierController.createSupplier(supplierDTO);
 
-        assertEquals(supplierDTO, response.getBody());
-        assertEquals(200, response.getStatusCodeValue());
+        StepVerifier.create(result)
+                .expectNext(supplierDTO)
+                .verifyComplete();
+
         verify(supplierService).createSupplier(supplierDTO);
     }
 
     @Test
     void testGetAllSuppliers() {
-        List<SupplierDTO> list = Collections.singletonList(supplierDTO);
-        when(supplierService.getAllSuppliers()).thenReturn(list);
+        when(supplierService.getAllSuppliers()).thenReturn(Flux.just(supplierDTO));
 
-        ResponseEntity<List<SupplierDTO>> response = supplierController.getAllSuppliers();
+        Flux<SupplierDTO> result = supplierController.getAllSuppliers();
 
-        assertEquals(list, response.getBody());
-        assertEquals(200, response.getStatusCodeValue());
+        StepVerifier.create(result)
+                .expectNext(supplierDTO)
+                .verifyComplete();
+
         verify(supplierService).getAllSuppliers();
     }
 
     @Test
     void testGetSupplierById() {
-        when(supplierService.getSupplierById(id)).thenReturn(supplierDTO);
+        when(supplierService.getSupplierById(id)).thenReturn(Mono.just(supplierDTO));
 
-        ResponseEntity<SupplierDTO> response = supplierController.getSupplierById(id);
+        Mono<ResponseEntity<SupplierDTO>> result = supplierController.getSupplierById(id);
 
-        assertEquals(supplierDTO, response.getBody());
-        assertEquals(200, response.getStatusCodeValue());
+        StepVerifier.create(result)
+                .expectNextMatches(response -> 
+                    response.getStatusCode().is2xxSuccessful() && 
+                    response.getBody().equals(supplierDTO))
+                .verifyComplete();
+
+        verify(supplierService).getSupplierById(id);
+    }
+
+    @Test
+    void testGetSupplierByIdNotFound() {
+        when(supplierService.getSupplierById(id)).thenReturn(Mono.empty());
+
+        Mono<ResponseEntity<SupplierDTO>> result = supplierController.getSupplierById(id);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is4xxClientError())
+                .verifyComplete();
+
         verify(supplierService).getSupplierById(id);
     }
 
     @Test
     void testUpdateSupplier() {
-        when(supplierService.updateSupplier(eq(id), any(SupplierDTO.class))).thenReturn(supplierDTO);
+        when(supplierService.updateSupplier(eq(id), any(SupplierDTO.class))).thenReturn(Mono.just(supplierDTO));
 
-        ResponseEntity<SupplierDTO> response = supplierController.updateSupplier(id, supplierDTO);
+        Mono<ResponseEntity<SupplierDTO>> result = supplierController.updateSupplier(id, supplierDTO);
 
-        assertEquals(supplierDTO, response.getBody());
-        assertEquals(200, response.getStatusCodeValue());
+        StepVerifier.create(result)
+                .expectNextMatches(response -> 
+                    response.getStatusCode().is2xxSuccessful() && 
+                    response.getBody().equals(supplierDTO))
+                .verifyComplete();
+
         verify(supplierService).updateSupplier(id, supplierDTO);
     }
 
     @Test
     void testDeleteSupplier() {
-        doNothing().when(supplierService).deleteSupplier(id);
+        when(supplierService.deleteSupplier(id)).thenReturn(Mono.empty());
 
-        ResponseEntity<Void> response = supplierController.deleteSupplier(id);
+        Mono<ResponseEntity<Void>> result = supplierController.deleteSupplier(id);
 
-        assertEquals(204, response.getStatusCodeValue());
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is2xxSuccessful())
+                .verifyComplete();
+
         verify(supplierService).deleteSupplier(id);
+    }
+
+    @Test
+    void testDeleteSupplierNotFound() {
+        // The service should return an error Mono when supplier is not found
+        when(supplierService.deleteSupplier(id)).thenReturn(Mono.error(new IllegalArgumentException("Supplier not found")));
+
+        Mono<ResponseEntity<Void>> result = supplierController.deleteSupplier(id);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.getStatusCode().is4xxClientError())
+                .verifyComplete();
+
+        verify(supplierService).deleteSupplier(id);
+    }
+
+    @Test
+    void testGetSupplierWithRating() {
+        when(supplierService.getSupplierWithRating(id)).thenReturn(Mono.just(supplierDTO));
+
+        Mono<ResponseEntity<SupplierDTO>> result = supplierController.getSupplierWithRating(id);
+
+        StepVerifier.create(result)
+                .expectNextMatches(response -> 
+                    response.getStatusCode().is2xxSuccessful() && 
+                    response.getBody().equals(supplierDTO))
+                .verifyComplete();
+
+        verify(supplierService).getSupplierWithRating(id);
     }
 }
