@@ -94,9 +94,11 @@ class PaymentControllerTest {
     void testCreatePayment() {
         when(paymentService.create(any(Payment.class))).thenReturn(payment);
 
-        ResponseEntity<Object> response = paymentController.createPayment(createRequest, "Bearer token");
+        ResponseEntity<?> response = paymentController.createPayment(createRequest, "Bearer token");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody() instanceof Payment);
         verify(paymentService).create(any(Payment.class));
     }
 
@@ -105,38 +107,135 @@ class PaymentControllerTest {
         List<Payment> payments = Arrays.asList(payment);
         when(paymentService.findAll()).thenReturn(payments);
 
-        ResponseEntity<Object> response = paymentController.getAllPayments("Bearer token");
+        ResponseEntity<?> response = paymentController.getAllPayments("Bearer token");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody() instanceof List);
         verify(paymentService).findAll();
     }
 
     @Test
-    void testGetPaymentDetail() {
+    void testGetPaymentById() {
         when(paymentService.findById("payment-1")).thenReturn(payment);
 
-        ResponseEntity<Map<String, Object>> response = paymentController.getPaymentDetail("payment-1", "Bearer token");
+        ResponseEntity<?> response = paymentController.getPaymentById("payment-1", "Bearer token");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody() instanceof Payment);
         verify(paymentService).findById("payment-1");
     }
 
     @Test
-    void testUpdatePaymentStatus() {
+    void testGetPaymentById_NotFound() {
+        when(paymentService.findById("payment-1")).thenReturn(null);
+
+        ResponseEntity<?> response = paymentController.getPaymentById("payment-1", "Bearer token");
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(paymentService).findById("payment-1");
+    }
+
+    @Test
+    void testUpdatePayment() {
         when(paymentService.findById("payment-1")).thenReturn(payment);
         when(paymentService.updateStatus("payment-1", "CICILAN")).thenReturn(payment);
 
-        ResponseEntity<Map<String, String>> response = paymentController.updatePaymentStatus("payment-1", editRequest, "Bearer token");
+        ResponseEntity<?> response = paymentController.updatePayment("payment-1", editRequest, "Bearer token");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody() instanceof Map);
+        verify(paymentService).findById("payment-1");
         verify(paymentService).updateStatus("payment-1", "CICILAN");
+    }
+
+    @Test
+    void testUpdatePayment_NotFound() {
+        when(paymentService.findById("payment-1")).thenReturn(null);
+
+        ResponseEntity<?> response = paymentController.updatePayment("payment-1", editRequest, "Bearer token");
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(paymentService).findById("payment-1");
+        verify(paymentService, never()).updateStatus(anyString(), anyString());
     }
 
     @Test
     void testDeletePayment() {
         ResponseEntity<?> response = paymentController.deletePayment("payment-1", "Bearer token");
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(paymentService).delete("payment-1");
+    }
+
+    @Test
+    void testGetPaymentsByCustomer() {
+        List<Payment> payments = Arrays.asList(payment);
+        when(paymentService.findByCustomerName("John Doe")).thenReturn(payments);
+
+        ResponseEntity<?> response = paymentController.getPaymentsByCustomer("John Doe", "Bearer token");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody() instanceof List);
+        verify(paymentService).findByCustomerName("John Doe");
+    }
+
+    @Test
+    void testCreatePayment_Unauthorized() {
+        // Enable auth for this test
+        ReflectionTestUtils.setField(paymentController, "authEnabled", true);
+
+        ResponseEntity<?> response = paymentController.createPayment(createRequest, null);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(paymentService, never()).create(any(Payment.class));
+    }
+
+    @Test
+    void testGetAllPayments_Unauthorized() {
+        // Enable auth for this test
+        ReflectionTestUtils.setField(paymentController, "authEnabled", true);
+
+        ResponseEntity<?> response = paymentController.getAllPayments(null);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(paymentService, never()).findAll();
+    }
+
+    @Test
+    void testGetPaymentById_Unauthorized() {
+        // Enable auth for this test
+        ReflectionTestUtils.setField(paymentController, "authEnabled", true);
+
+        ResponseEntity<?> response = paymentController.getPaymentById("payment-1", null);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(paymentService, never()).findById(anyString());
+    }
+
+    @Test
+    void testUpdatePayment_Unauthorized() {
+        // Enable auth for this test
+        ReflectionTestUtils.setField(paymentController, "authEnabled", true);
+
+        ResponseEntity<?> response = paymentController.updatePayment("payment-1", editRequest, null);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(paymentService, never()).findById(anyString());
+        verify(paymentService, never()).updateStatus(anyString(), anyString());
+    }
+
+    @Test
+    void testDeletePayment_Unauthorized() {
+        // Enable auth for this test
+        ReflectionTestUtils.setField(paymentController, "authEnabled", true);
+
+        ResponseEntity<?> response = paymentController.deletePayment("payment-1", null);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(paymentService, never()).delete(anyString());
     }
 }
