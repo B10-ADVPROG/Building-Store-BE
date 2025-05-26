@@ -2,9 +2,9 @@ name: CI - Build & Test
 
 on:
   push:
-    branches: [ staging, auth, manajemen-produk ]
+    branches: [ main, staging, auth, manajemen-produk ]
   pull_request:
-    branches: [ staging, auth, manajemen-produk ]
+    branches: [ main, staging, auth, manajemen-produk ]
 
 jobs:
   build:
