@@ -177,7 +177,7 @@ public class PaymentController {
         try {
             // Check admin authorization
             ResponseEntity<Map<String, Object>> adminResponse = authWebClient.post()
-                    .uri("/auth-admin/")
+                    .uri("/auth/auth-admin/")
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(requestBody)
                     .retrieve()
@@ -191,7 +191,7 @@ public class PaymentController {
 
             // Check cashier authorization
             ResponseEntity<Map<String, Object>> cashierResponse = authWebClient.post()
-                    .uri("/auth-cashier/")
+                    .uri("/auth/auth-kasir/")
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(requestBody)
                     .retrieve()
@@ -217,7 +217,7 @@ public class PaymentController {
 
         try {
             ResponseEntity<Map<String, Object>> response = authWebClient.post()
-                    .uri("/auth-admin/")
+                    .uri("/auth/auth-admin/")
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(requestBody)
                     .retrieve()
