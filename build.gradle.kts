@@ -4,12 +4,24 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"  // Using newer version
     id("jacoco")
     id("pmd")
+    id("org.sonarqube") version "4.3.1.3277"
 }
 
 pmd {
     toolVersion = "7.10.0"
     ruleSetFiles = files("pmd/ruleset.xml")
     isIgnoreFailures = true
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "B10-ADVPROG_Building-Store-BE")
+        property("sonar.organization", "b10-advprog")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.java.coveragePlugin", "jacoco")
+        property("sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+        property("sonar.exclusions", "**/dto/**,**/*Application.java")
+    }
 }
 
 group = "id.ac.ui.cs.advprog"
