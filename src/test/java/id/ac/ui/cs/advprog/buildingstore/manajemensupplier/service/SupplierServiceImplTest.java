@@ -202,4 +202,99 @@ class SupplierServiceImplTest {
 
         verify(supplierRatingService).getSupplierRating(supplier.getName());
     }
+
+    @Test
+    void shouldHandleUpdateSupplierError() {
+        when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.of(supplier));
+        when(supplierRepository.save(any(Supplier.class))).thenThrow(new RuntimeException("Database error"));
+
+        Mono<SupplierDTO> result = supplierService.updateSupplier(id, supplierDTO);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException 
+                    && throwable.getMessage().equals("Database error"))
+                .verify();
+
+        verify(monitoringService).recordSupplierError("update");
+        verify(monitoringService).recordOperationTime(any(), eq("update"));
+    }
+
+    @Test
+    void shouldHandleDeleteSupplierError() {
+        when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.of(supplier));
+        when(supplierRepository.save(any(Supplier.class))).thenThrow(new RuntimeException("Database error"));
+
+        Mono<Void> result = supplierService.deleteSupplier(id);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException 
+                    && throwable.getMessage().equals("Database error"))
+                .verify();
+
+        verify(monitoringService).recordSupplierError("delete");
+        verify(monitoringService).recordOperationTime(any(), eq("delete"));
+    }
+
+    @Test
+    void shouldHandleGetAllSuppliersError() {
+        when(supplierRepository.findByActive(true)).thenThrow(new RuntimeException("Database connection error"));
+        
+        Flux<SupplierDTO> result = supplierService.getAllSuppliers();
+        
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException 
+                    && throwable.getMessage().equals("Database connection error"))
+                .verify();
+        
+        verify(monitoringService).recordSupplierError("getAll");
+        verify(monitoringService).recordOperationTime(any(), eq("getAll"));
+    }
+
+    @Test
+    void shouldHandleCreateSupplierError() {
+        // Simulate an exception during save
+        when(supplierRepository.save(any(Supplier.class))).thenThrow(new RuntimeException("Create error"));
+
+        Mono<SupplierDTO> result = supplierService.createSupplier(supplierDTO);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException
+                        && throwable.getMessage().equals("Create error"))
+                .verify();
+
+        verify(monitoringService).recordSupplierError("create");
+        verify(monitoringService).recordOperationTime(any(), eq("create"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUpdateSupplierNotFound() {
+        // Simulate not found
+        when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        Mono<SupplierDTO> result = supplierService.updateSupplier(id, supplierDTO);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException
+                        && throwable.getMessage().contains("Supplier not found with id"))
+                .verify();
+
+        verify(monitoringService).recordSupplierError("update");
+        verify(monitoringService).recordOperationTime(any(), eq("update"));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDeleteSupplierNotFound() {
+        // Simulate not found
+        when(supplierRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+
+        Mono<Void> result = supplierService.deleteSupplier(id);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException
+                        && throwable.getMessage().contains("Supplier not found with id"))
+                .verify();
+
+        verify(monitoringService).recordSupplierError("delete");
+        verify(monitoringService).recordOperationTime(any(), eq("delete"));
+    }
 }
