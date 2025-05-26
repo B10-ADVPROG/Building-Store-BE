@@ -1,6 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemenpembayaran.controller;
 
-import id.ac.ui.cs.advprog.buildingstore.authentication.dto.AuthorizationRequest;
+import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthorizationService;
 import id.ac.ui.cs.advprog.buildingstore.manajemenpembayaran.dto.CreatePaymentRequest;
 import id.ac.ui.cs.advprog.buildingstore.manajemenpembayaran.dto.EditPaymentDTO;
 import id.ac.ui.cs.advprog.buildingstore.manajemenpembayaran.model.Payment;
@@ -9,16 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,10 +26,7 @@ class PaymentControllerTest {
     private PaymentService paymentService;
 
     @Mock
-    private WebClient.Builder webClientBuilder;
-    
-    @Mock
-    private WebClient webClient;
+    private AuthorizationService authorizationService;
 
     private PaymentController paymentController;
 
@@ -43,40 +34,15 @@ class PaymentControllerTest {
     private CreatePaymentRequest createRequest;
     private EditPaymentDTO editRequest;
     
-    @SuppressWarnings("unchecked")
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         
-        // Setup WebClient builder
-        when(webClientBuilder.baseUrl(anyString())).thenReturn(webClientBuilder);
-        when(webClientBuilder.defaultHeader(anyString(), anyString())).thenReturn(webClientBuilder);
-        when(webClientBuilder.build()).thenReturn(webClient);
+        paymentController = new PaymentController(paymentService, authorizationService);
         
-        // Setup simplified WebClient mock chain using generic mocking
-        WebClient.RequestBodyUriSpec requestBodyUriSpec = mock(WebClient.RequestBodyUriSpec.class);
-        WebClient.RequestBodySpec requestBodySpec = mock(WebClient.RequestBodySpec.class);
-        WebClient.ResponseSpec responseSpec = mock(WebClient.ResponseSpec.class);
-        WebClient.RequestHeadersSpec requestHeadersSpec = mock(WebClient.RequestHeadersSpec.class);
-
-        when(webClient.post()).thenReturn(requestBodyUriSpec);
-        when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
-        when(requestBodySpec.contentType(any(MediaType.class))).thenReturn(requestBodySpec);
-        when(requestBodySpec.bodyValue(any())).thenReturn(requestHeadersSpec);
-        when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        
-        // Setup response
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("message", "Authorized as administrator");
-        ResponseEntity<Map<String, Object>> responseEntity = 
-            new ResponseEntity<>(responseBody, HttpStatus.OK);
-            
-        Mono<ResponseEntity<Map<String, Object>>> mono = Mono.just(responseEntity);
-        when(responseSpec.toEntity(any(ParameterizedTypeReference.class))).thenReturn(mono);
-        
-        // Create controller and disable auth for testing
-        paymentController = new PaymentController(paymentService, webClientBuilder, "http://localhost:8080");
-        ReflectionTestUtils.setField(paymentController, "authEnabled", false);
+        // Mock authorization to return true for tests
+        when(authorizationService.authorizeAdmin(anyString())).thenReturn(true);
+        when(authorizationService.authorizeKasir(anyString())).thenReturn(true);
         
         // Create test data
         payment = new Payment.Builder()
@@ -185,10 +151,10 @@ class PaymentControllerTest {
 
     @Test
     void testCreatePayment_Unauthorized() {
-        // Enable auth for this test
-        ReflectionTestUtils.setField(paymentController, "authEnabled", true);
+        when(authorizationService.authorizeAdmin(anyString())).thenReturn(false);
+        when(authorizationService.authorizeKasir(anyString())).thenReturn(false);
 
-        ResponseEntity<?> response = paymentController.createPayment(createRequest, null);
+        ResponseEntity<?> response = paymentController.createPayment(createRequest, "Bearer invalidtoken");
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         verify(paymentService, never()).create(any(Payment.class));
@@ -196,10 +162,10 @@ class PaymentControllerTest {
 
     @Test
     void testGetAllPayments_Unauthorized() {
-        // Enable auth for this test
-        ReflectionTestUtils.setField(paymentController, "authEnabled", true);
+        when(authorizationService.authorizeAdmin(anyString())).thenReturn(false);
+        when(authorizationService.authorizeKasir(anyString())).thenReturn(false);
 
-        ResponseEntity<?> response = paymentController.getAllPayments(null);
+        ResponseEntity<?> response = paymentController.getAllPayments("Bearer invalidtoken");
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         verify(paymentService, never()).findAll();
@@ -207,10 +173,10 @@ class PaymentControllerTest {
 
     @Test
     void testGetPaymentById_Unauthorized() {
-        // Enable auth for this test
-        ReflectionTestUtils.setField(paymentController, "authEnabled", true);
+        when(authorizationService.authorizeAdmin(anyString())).thenReturn(false);
+        when(authorizationService.authorizeKasir(anyString())).thenReturn(false);
 
-        ResponseEntity<?> response = paymentController.getPaymentById("payment-1", null);
+        ResponseEntity<?> response = paymentController.getPaymentById("payment-1", "Bearer invalidtoken");
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         verify(paymentService, never()).findById(anyString());
@@ -218,10 +184,10 @@ class PaymentControllerTest {
 
     @Test
     void testUpdatePayment_Unauthorized() {
-        // Enable auth for this test
-        ReflectionTestUtils.setField(paymentController, "authEnabled", true);
+        when(authorizationService.authorizeAdmin(anyString())).thenReturn(false);
+        when(authorizationService.authorizeKasir(anyString())).thenReturn(false);
 
-        ResponseEntity<?> response = paymentController.updatePayment("payment-1", editRequest, null);
+        ResponseEntity<?> response = paymentController.updatePayment("payment-1", editRequest, "Bearer invalidtoken");
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         verify(paymentService, never()).findById(anyString());
@@ -230,12 +196,27 @@ class PaymentControllerTest {
 
     @Test
     void testDeletePayment_Unauthorized() {
-        // Enable auth for this test
-        ReflectionTestUtils.setField(paymentController, "authEnabled", true);
+        when(authorizationService.authorizeAdmin(anyString())).thenReturn(false);
 
-        ResponseEntity<?> response = paymentController.deletePayment("payment-1", null);
+        ResponseEntity<?> response = paymentController.deletePayment("payment-1", "Bearer invalidtoken");
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         verify(paymentService, never()).delete(anyString());
+    }
+
+    @Test
+    void testCreatePayment_NoAuthHeader() {
+        ResponseEntity<?> response = paymentController.createPayment(createRequest, null);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(paymentService, never()).create(any(Payment.class));
+    }
+
+    @Test
+    void testCreatePayment_InvalidAuthHeader() {
+        ResponseEntity<?> response = paymentController.createPayment(createRequest, "InvalidHeader");
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(paymentService, never()).create(any(Payment.class));
     }
 }

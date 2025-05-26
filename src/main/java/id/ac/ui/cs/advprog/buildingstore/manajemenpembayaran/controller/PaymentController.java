@@ -1,20 +1,17 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemenpembayaran.controller;
 
-import id.ac.ui.cs.advprog.buildingstore.authentication.dto.AuthorizationRequest;
+import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthorizationService;
 import id.ac.ui.cs.advprog.buildingstore.manajemenpembayaran.dto.CreatePaymentRequest;
 import id.ac.ui.cs.advprog.buildingstore.manajemenpembayaran.dto.EditPaymentDTO;
 import id.ac.ui.cs.advprog.buildingstore.manajemenpembayaran.model.Payment;
 import id.ac.ui.cs.advprog.buildingstore.manajemenpembayaran.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -23,28 +20,19 @@ import java.util.*;
 @Validated
 public class PaymentController {
 
+    private final PaymentService paymentService;
+    private final AuthorizationService authorizationService;
+
     @Autowired
-    private PaymentService paymentService;
-
-    private final WebClient authWebClient;
-
-    @Value("${auth.enabled:true}")
-    private boolean authEnabled;
-
-    public PaymentController(PaymentService paymentService,
-                           WebClient.Builder webClientBuilder,
-                           @Value("${auth.service.base-url:http://localhost:8080}") String authServiceBaseUrl) {
+    public PaymentController(PaymentService paymentService, AuthorizationService authorizationService) {
         this.paymentService = paymentService;
-        this.authWebClient = webClientBuilder
-                .baseUrl(authServiceBaseUrl)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
+        this.authorizationService = authorizationService;
     }
 
     @GetMapping
     public ResponseEntity<?> getAllPayments(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
+            return createUnauthorizedResponse();
         }
         List<Payment> payments = paymentService.findAll();
         return ResponseEntity.ok(payments);
@@ -53,7 +41,7 @@ public class PaymentController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getPaymentById(@PathVariable String id, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
+            return createUnauthorizedResponse();
         }
         Payment payment = paymentService.findById(id);
         if (payment == null) {
@@ -65,7 +53,7 @@ public class PaymentController {
     @PostMapping
     public ResponseEntity<?> createPayment(@Valid @RequestBody CreatePaymentRequest requestBody, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
+            return createUnauthorizedResponse();
         }
         Payment newPayment = new Payment.Builder()
                 .customerName(requestBody.getCustomerName())
@@ -80,7 +68,7 @@ public class PaymentController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePayment(@PathVariable String id, @RequestBody EditPaymentDTO requestBody, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
+            return createUnauthorizedResponse();
         }
         Payment existingPayment = paymentService.findById(id);
         if (existingPayment == null) {
@@ -93,7 +81,7 @@ public class PaymentController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePayment(@PathVariable String id, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
+            return createUnauthorizedResponse();
         }
         paymentService.delete(id);
         return ResponseEntity.noContent().build();
@@ -102,51 +90,28 @@ public class PaymentController {
     @GetMapping("/customer/{customerName}")
     public ResponseEntity<?> getPaymentsByCustomer(@PathVariable String customerName, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
+            return createUnauthorizedResponse();
         }
         List<Payment> payments = paymentService.findByCustomerName(customerName);
         return ResponseEntity.ok(payments);
     }
 
     private boolean isAuthorizedAsCashierOrAdmin(String authHeader) {
-        if (!authEnabled) {
-            return true;
-        }
-
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return false;
         }
-
-        AuthorizationRequest requestBody = new AuthorizationRequest();
-        requestBody.setToken(authHeader.substring(7));
-
+        
+        String token = authHeader.substring(7);
+        
         try {
-            // Check admin authorization
-            ResponseEntity<Map<String, Object>> adminResponse = authWebClient.post()
-                    .uri("/auth/auth-admin/")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .toEntity(new ParameterizedTypeReference<Map<String, Object>>() {})
-                    .block(Duration.ofSeconds(3));
-
-            if (adminResponse != null && adminResponse.getStatusCode() == HttpStatus.OK &&
-                adminResponse.getBody() != null && "Authorized as administrator".equals(adminResponse.getBody().get("message"))) {
+            // Check admin authorization first
+            if (authorizationService.authorizeAdmin(token)) {
                 return true;
             }
-
-            // Check cashier authorization
-            ResponseEntity<Map<String, Object>> cashierResponse = authWebClient.post()
-                    .uri("/auth/auth-kasir/")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .toEntity(new ParameterizedTypeReference<Map<String, Object>>() {})
-                    .block(Duration.ofSeconds(3));
-
-            return cashierResponse != null && cashierResponse.getStatusCode() == HttpStatus.OK &&
-                   cashierResponse.getBody() != null && "Authorized as cashier".equals(cashierResponse.getBody().get("message"));
-
+            
+            // Use the correct method name for cashier
+            return authorizationService.authorizeKasir(token);
+            
         } catch (Exception e) {
             System.err.println("Authorization error: " + e.getMessage());
             return false;
@@ -154,33 +119,28 @@ public class PaymentController {
     }
 
     private boolean isAuthorizedAsAdmin(String authHeader) {
-        if (!authEnabled) {
-            return true;
-        }
-
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return false;
         }
-
-        AuthorizationRequest requestBody = new AuthorizationRequest();
-        requestBody.setToken(authHeader.substring(7));
-
+        
+        String token = authHeader.substring(7);
+        
         try {
-            ResponseEntity<Map<String, Object>> response = authWebClient.post()
-                    .uri("/auth/auth-admin/")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .toEntity(new ParameterizedTypeReference<Map<String, Object>>() {})
-                    .block(Duration.ofSeconds(3));
-
-            return response != null &&
-                    response.getStatusCode() == HttpStatus.OK &&
-                    response.getBody() != null &&
-                    "Authorized as administrator".equals(response.getBody().get("message"));
+            return authorizationService.authorizeAdmin(token);
         } catch (Exception e) {
             System.err.println("Admin authorization error: " + e.getMessage());
             return false;
         }
+    }
+
+    private ResponseEntity<Object> createUnauthorizedResponse() {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("timestamp", LocalDateTime.now());
+        errorBody.put("status", HttpStatus.FORBIDDEN.value());
+        errorBody.put("error", "Forbidden");
+        errorBody.put("message", "Access denied. Cashier or Administrator role required for payment operations.");
+        errorBody.put("path", "/api/payments");
+        
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
     }
 }
