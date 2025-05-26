@@ -1,7 +1,6 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemenproduk.controller;
 
 
-import id.ac.ui.cs.advprog.buildingstore.authentication.dto.AuthorizationRequest;
 import id.ac.ui.cs.advprog.buildingstore.authentication.service.AuthorizationService;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.dto.CreateProductRequest;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.dto.EditProductDTO;
@@ -10,14 +9,10 @@ import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.Duration;
 import java.util.*;
 
 @RestController
@@ -86,6 +81,8 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
 
+        System.out.println("Is authorized as admin: " + isAuthorizedAsAdmin(authHeader));
+
         try {
             System.out.println("Checkpoint 1");
             Product newProduct = new Product.Builder()
@@ -151,12 +148,19 @@ public class ProductController {
     }
 
     private boolean isAuthorizedAsAdmin(String authHeader) {
+        System.out.println("Method isAuthorizedAsAdmin called");
+
         if (!authEnabled) {
+            System.out.println("Authorization is disabled");
             return true;
         }
 
+
         if (authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
+
+            System.out.println("Token: " + token);
+
             return authorizationService.authorizeAdmin(token);
         }
         return false;

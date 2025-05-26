@@ -8,15 +8,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -56,7 +57,7 @@ public class ViewProductsTest {
 
     @Test
     void testViewProducts() throws Exception {
-        Mockito.when(productService.findAll()).thenReturn(List.of(product1, product2));
+        when(productService.findAll()).thenReturn(List.of(product1, product2));
 
         mockMvc.perform(get("/product/")
                         .header("Authorization", "Bearer Token"))
@@ -66,6 +67,17 @@ public class ViewProductsTest {
                 .andExpect(jsonPath("$[0].price", is(75000)))
                 .andExpect(jsonPath("$[1].name", is("Cat Dinding Premium")))
                 .andExpect(jsonPath("$[1].stock", is(50)));
+    }
+
+    @Test
+    public void testAllProductsEmpty() throws Exception {
+        when(productService.findAll()).thenReturn(List.of());
+
+        mockMvc.perform(get("/product/")
+                        .header("Authorization", "Bearer Token")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("No products available"));
     }
 
 
