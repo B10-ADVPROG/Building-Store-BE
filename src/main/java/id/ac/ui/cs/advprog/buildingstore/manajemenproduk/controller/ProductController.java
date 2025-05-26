@@ -55,7 +55,7 @@ public class ProductController {
 
 
     @GetMapping("/detail/{id}/")
-    public ResponseEntity<Map<String, Object>> getProductDetail(@PathVariable String id, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Map<String, Object>> getProductDetail(@PathVariable String id, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsAdmin(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
@@ -76,7 +76,7 @@ public class ProductController {
     }
 
     @PostMapping("/create/")
-    public ResponseEntity<Object> createProduct(@Valid @RequestBody CreateProductRequest requestBody, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Object> createProduct(@Valid @RequestBody CreateProductRequest requestBody, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsAdmin(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
@@ -103,7 +103,7 @@ public class ProductController {
     }
 
     @PutMapping("/edit/{id}/")
-    public ResponseEntity<Map<String, String>> updateProduct(@PathVariable("id") String id, @RequestBody EditProductDTO requestBody, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Map<String, String>> updateProduct(@PathVariable("id") String id, @RequestBody EditProductDTO requestBody, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsAdmin(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
@@ -135,9 +135,9 @@ public class ProductController {
     }
 
     @DeleteMapping("/delete/{id}/")
-    public ResponseEntity<?> deleteProduct(@PathVariable String id, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> deleteProduct(@PathVariable String id, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
         try {
             productService.delete(id);
@@ -156,7 +156,7 @@ public class ProductController {
         }
 
 
-        if (authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
             System.out.println("Token: " + token);
