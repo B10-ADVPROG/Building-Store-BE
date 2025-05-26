@@ -18,7 +18,8 @@ import java.time.Duration;
 import java.util.*;
 
 @RestController
-@RequestMapping("/payment")
+@RequestMapping("/api/payments")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "https://building-store-fe-production.up.railway.app"})
 @Validated
 public class PaymentController {
 
@@ -40,127 +41,69 @@ public class PaymentController {
                 .build();
     }
 
-    @GetMapping("/")
-    public ResponseEntity<Object> getAllPayments(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+    @GetMapping
+    public ResponseEntity<?> getAllPayments(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
         }
-
         List<Payment> payments = paymentService.findAll();
-        List<Map<String, Object>> response = new ArrayList<>();
-
-        if (payments.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "No payments available"));
-        }
-
-        for (Payment payment : payments) {
-            Map<String, Object> paymentMap = new HashMap<>();
-            paymentMap.put("paymentId", payment.getPaymentId());
-            paymentMap.put("customerName", payment.getCustomerName());
-            paymentMap.put("amount", payment.getAmount());
-            paymentMap.put("paymentMethod", payment.getPaymentMethod());
-            paymentMap.put("status", payment.getStatus());
-            paymentMap.put("createdAt", payment.getCreatedAt());
-            paymentMap.put("updatedAt", payment.getUpdatedAt());
-            response.add(paymentMap);
-        }
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(payments);
     }
 
-    @GetMapping("/detail/{id}/")
-    public ResponseEntity<Map<String, Object>> getPaymentDetail(@PathVariable String id, @RequestHeader("Authorization") String authHeader) {
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getPaymentById(@PathVariable String id, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
         }
-
         Payment payment = paymentService.findById(id);
-
-        if (payment != null) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("paymentId", payment.getPaymentId());
-            response.put("customerName", payment.getCustomerName());
-            response.put("amount", payment.getAmount());
-            response.put("paymentMethod", payment.getPaymentMethod());
-            response.put("status", payment.getStatus());
-            response.put("createdAt", payment.getCreatedAt());
-            response.put("updatedAt", payment.getUpdatedAt());
-            return ResponseEntity.ok(response);
-        } else {
+        if (payment == null) {
             return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(payment);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<Object> createPayment(@Valid @RequestBody CreatePaymentRequest requestBody, @RequestHeader("Authorization") String authHeader) {
+    @PostMapping
+    public ResponseEntity<?> createPayment(@Valid @RequestBody CreatePaymentRequest requestBody, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
         }
-
-        try {
-            Payment newPayment = new Payment.Builder()
-                    .customerName(requestBody.getCustomerName())
-                    .amount(requestBody.getAmount())
-                    .paymentMethod(requestBody.getPaymentMethod())
-                    .status(requestBody.getStatus())
-                    .build();
-
-            Payment savedPayment = paymentService.create(newPayment);
-
-            // Return the created payment with its ID
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "New payment record created successfully");
-            response.put("paymentId", savedPayment.getPaymentId());
-            response.put("payment", savedPayment);
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body(Map.of("message", "Invalid request: " + e.getMessage()));
-        }
+        Payment newPayment = new Payment.Builder()
+                .customerName(requestBody.getCustomerName())
+                .amount(requestBody.getAmount())
+                .paymentMethod(requestBody.getPaymentMethod())
+                .status(requestBody.getStatus())
+                .build();
+        Payment savedPayment = paymentService.create(newPayment);
+        return ResponseEntity.ok(savedPayment);
     }
 
-    @PutMapping("/edit/{id}/")
-    public ResponseEntity<Map<String, String>> updatePaymentStatus(@PathVariable("id") String id, @RequestBody EditPaymentDTO requestBody, @RequestHeader("Authorization") String authHeader) {
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updatePayment(@PathVariable String id, @RequestBody EditPaymentDTO requestBody, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
         }
-
-        try {
-            Payment existingPayment = paymentService.findById(id);
-            if (existingPayment == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("message", "Payment not found"));
-            }
-
-            paymentService.updateStatus(id, requestBody.getStatus());
-
-            return ResponseEntity.ok(Map.of("message", "Payment status updated successfully"));
-
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body(Map.of("message", "Failed to update payment: " + e.getMessage()));
+        Payment existingPayment = paymentService.findById(id);
+        if (existingPayment == null) {
+            return ResponseEntity.notFound().build();
         }
+        paymentService.updateStatus(id, requestBody.getStatus());
+        return ResponseEntity.ok(Map.of("message", "Payment status updated successfully"));
     }
 
-    @DeleteMapping("/delete/{id}/")
-    public ResponseEntity<?> deletePayment(@PathVariable String id, @RequestHeader("Authorization") String authHeader) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePayment(@PathVariable String id, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or missing token");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
         }
-        try {
-            paymentService.delete(id);
-            return ResponseEntity.ok(Map.of("message", "Payment deleted successfully"));
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body(Map.of("message", "Failed to delete payment: " + e.getMessage()));
-        }
+        paymentService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/customer/{customerName}/")
-    public ResponseEntity<Object> getPaymentsByCustomer(@PathVariable String customerName, @RequestHeader("Authorization") String authHeader) {
+    @GetMapping("/customer/{customerName}")
+    public ResponseEntity<?> getPaymentsByCustomer(@PathVariable String customerName, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", "Access denied"));
         }
-
         List<Payment> payments = paymentService.findByCustomerName(customerName);
         return ResponseEntity.ok(payments);
     }
@@ -213,6 +156,10 @@ public class PaymentController {
     private boolean isAuthorizedAsAdmin(String authHeader) {
         if (!authEnabled) {
             return true;
+        }
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return false;
         }
 
         AuthorizationRequest requestBody = new AuthorizationRequest();
