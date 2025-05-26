@@ -121,7 +121,8 @@ public class SupplierController {
                     }
                     return supplierService.getSupplierWithRating(id)
                             .map(supplier -> ResponseEntity.ok((Object) supplier))
-                            .onErrorReturn(ResponseEntity.notFound().build());
+                            .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()))
+                            .onErrorReturn(ResponseEntity.badRequest().build());
                 });
     }
 
