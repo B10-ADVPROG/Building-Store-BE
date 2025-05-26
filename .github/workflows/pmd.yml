@@ -2,8 +2,10 @@ name: PMD
 on:
   push:
     branches:
-      - "transaksi-penjualan-william"
+      - "main"
   pull_request:
+    branches:
+      - "main"
 jobs:
   sonarcloud:
     name: Build and analyze

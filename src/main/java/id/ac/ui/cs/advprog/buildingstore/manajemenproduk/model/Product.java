@@ -1,5 +1,8 @@
 package id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
@@ -7,7 +10,10 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import java.util.UUID;
 
 @Getter
+@Entity
+@Table(name = "product")
 public class Product {
+    @Id
     private String productId;
     private String productName;
     private String productDescription;
