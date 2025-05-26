@@ -72,7 +72,7 @@ public class SupplierController {
                     }
                     return supplierService.getSupplierById(id)
                             .map(supplier -> ResponseEntity.ok((Object) supplier))
-                            .onErrorReturn(ResponseEntity.notFound().build());
+                            .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
                 });
     }
 
