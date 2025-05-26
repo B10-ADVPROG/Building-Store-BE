@@ -10,6 +10,5 @@ public interface PaymentService {
     Payment findById(String id);
     Payment updateStatus(String id, String status);
     void delete(String id);
-    List<Payment> findByCustomerId(String customerId);
-    List<Payment> findByTransactionId(String transactionId);
+    List<Payment> findByCustomerName(String customerName);
 }

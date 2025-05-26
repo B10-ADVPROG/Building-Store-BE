@@ -14,24 +14,27 @@ import java.util.UUID;
 public class Payment {
     @Id
     private String paymentId;
-    private String customerId;
+    private String customerName;
     private int amount;
     private String paymentMethod;
-    private String status; // LUNAS or CICILAN
-    private String transactionId;
+    private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     public Payment() {
+        // Auto-generate UUID for default constructor
+        this.paymentId = UUID.randomUUID().toString();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public Payment(Builder builder) {
-        setPaymentId(builder.paymentId);
-        setCustomerId(builder.customerId);
+        // Ensure paymentId is never null
+        this.paymentId = builder.paymentId != null ? builder.paymentId : UUID.randomUUID().toString();
+        setCustomerName(builder.customerName);
         setAmount(builder.amount);
         setPaymentMethod(builder.paymentMethod);
         setStatus(builder.status);
-        setTransactionId(builder.transactionId);
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -43,11 +46,11 @@ public class Payment {
         this.paymentId = paymentId;
     }
 
-    public void setCustomerId(String customerId) {
-        if (customerId == null || customerId.isEmpty()) {
-            throw new IllegalArgumentException("Customer id cannot be null or empty");
+    public void setCustomerName(String customerName) {
+        if (customerName == null || customerName.isEmpty()) {
+            throw new IllegalArgumentException("Customer name cannot be null or empty");
         }
-        this.customerId = customerId;
+        this.customerName = customerName;
     }
 
     public void setAmount(int amount) {
@@ -75,34 +78,25 @@ public class Payment {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void setTransactionId(String transactionId) {
-        if (transactionId == null || transactionId.isEmpty()) {
-            throw new IllegalArgumentException("Transaction id cannot be null or empty");
-        }
-        this.transactionId = transactionId;
-    }
-
     public static class Builder {
         private String paymentId;
-        private String customerId;
+        private String customerName;
         private int amount;
         private String paymentMethod;
         private String status;
-        private String transactionId;
 
-        private boolean customerIdRequired = true;
+        private boolean customerNameRequired = true;
         private boolean amountRequired = true;
         private boolean paymentMethodRequired = true;
         private boolean statusRequired = true;
-        private boolean transactionIdRequired = true;
 
         public Builder() {
             this.paymentId = UUID.randomUUID().toString();
         }
 
-        public Builder customerId(String customerId) {
-            this.customerId = customerId;
-            customerIdRequired = false;
+        public Builder customerName(String customerName) {
+            this.customerName = customerName;
+            customerNameRequired = false;
             return this;
         }
 
@@ -124,16 +118,13 @@ public class Payment {
             return this;
         }
 
-        public Builder transactionId(String transactionId) {
-            this.transactionId = transactionId;
-            transactionIdRequired = false;
-            return this;
-        }
-
         public Payment build() {
-            if (customerIdRequired || amountRequired || paymentMethodRequired || 
-                statusRequired || transactionIdRequired) {
+            if (customerNameRequired || amountRequired || paymentMethodRequired || statusRequired) {
                 throw new IllegalStateException("Required fields are missing");
+            }
+            // Ensure paymentId is set before building
+            if (this.paymentId == null) {
+                this.paymentId = UUID.randomUUID().toString();
             }
             return new Payment(this);
         }

@@ -29,11 +29,10 @@ class PaymentServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         payment = new Payment.Builder()
-                .customerId("customer-123")
+                .customerName("John Doe")
                 .amount(100000)
                 .paymentMethod("CASH")
                 .status("LUNAS")
-                .transactionId("trans-123")
                 .build();
     }
 
@@ -44,7 +43,7 @@ class PaymentServiceTest {
         Payment result = paymentService.create(payment);
 
         assertNotNull(result);
-        assertEquals(payment.getCustomerId(), result.getCustomerId());
+        assertEquals(payment.getCustomerName(), result.getCustomerName());
         verify(paymentRepository).save(payment);
     }
 
@@ -85,5 +84,17 @@ class PaymentServiceTest {
     void testDeletePayment() {
         paymentService.delete("payment-1");
         verify(paymentRepository).deleteById("payment-1");
+    }
+
+    @Test
+    void testFindPaymentsByCustomer() {
+        List<Payment> payments = Arrays.asList(payment);
+        when(paymentRepository.findByCustomerName("John Doe")).thenReturn(payments);
+
+        List<Payment> result = paymentService.findByCustomerName("John Doe");
+
+        assertEquals(1, result.size());
+        assertEquals(payment, result.get(0));
+        verify(paymentRepository).findByCustomerName("John Doe");
     }
 }

@@ -44,12 +44,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<Payment> findByCustomerId(String customerId) {
-        return repository.findByCustomerId(customerId);
-    }
-
-    @Override
-    public List<Payment> findByTransactionId(String transactionId) {
-        return repository.findByTransactionId(transactionId);
+    public List<Payment> findByCustomerName(String customerName) {
+        return repository.findByCustomerName(customerName);
     }
 }

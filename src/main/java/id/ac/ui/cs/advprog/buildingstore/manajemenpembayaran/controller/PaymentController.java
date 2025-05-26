@@ -55,12 +55,11 @@ public class PaymentController {
 
         for (Payment payment : payments) {
             Map<String, Object> paymentMap = new HashMap<>();
-            paymentMap.put("id", payment.getPaymentId());
-            paymentMap.put("customerId", payment.getCustomerId());
+            paymentMap.put("paymentId", payment.getPaymentId());
+            paymentMap.put("customerName", payment.getCustomerName());
             paymentMap.put("amount", payment.getAmount());
             paymentMap.put("paymentMethod", payment.getPaymentMethod());
             paymentMap.put("status", payment.getStatus());
-            paymentMap.put("transactionId", payment.getTransactionId());
             paymentMap.put("createdAt", payment.getCreatedAt());
             paymentMap.put("updatedAt", payment.getUpdatedAt());
             response.add(paymentMap);
@@ -80,11 +79,10 @@ public class PaymentController {
         if (payment != null) {
             Map<String, Object> response = new HashMap<>();
             response.put("paymentId", payment.getPaymentId());
-            response.put("customerId", payment.getCustomerId());
+            response.put("customerName", payment.getCustomerName());
             response.put("amount", payment.getAmount());
             response.put("paymentMethod", payment.getPaymentMethod());
             response.put("status", payment.getStatus());
-            response.put("transactionId", payment.getTransactionId());
             response.put("createdAt", payment.getCreatedAt());
             response.put("updatedAt", payment.getUpdatedAt());
             return ResponseEntity.ok(response);
@@ -93,7 +91,7 @@ public class PaymentController {
         }
     }
 
-    @PostMapping("/create/")
+    @PostMapping("/create")
     public ResponseEntity<Object> createPayment(@Valid @RequestBody CreatePaymentRequest requestBody, @RequestHeader("Authorization") String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
@@ -101,16 +99,21 @@ public class PaymentController {
 
         try {
             Payment newPayment = new Payment.Builder()
-                    .customerId(requestBody.getCustomerId())
+                    .customerName(requestBody.getCustomerName())
                     .amount(requestBody.getAmount())
                     .paymentMethod(requestBody.getPaymentMethod())
                     .status(requestBody.getStatus())
-                    .transactionId(requestBody.getTransactionId())
                     .build();
 
-            paymentService.create(newPayment);
+            Payment savedPayment = paymentService.create(newPayment);
 
-            return ResponseEntity.ok(Map.of("message", "New payment record created successfully"));
+            // Return the created payment with its ID
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "New payment record created successfully");
+            response.put("paymentId", savedPayment.getPaymentId());
+            response.put("payment", savedPayment);
+
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             return ResponseEntity.status(400).body(Map.of("message", "Invalid request: " + e.getMessage()));
@@ -152,13 +155,13 @@ public class PaymentController {
         }
     }
 
-    @GetMapping("/customer/{customerId}/")
-    public ResponseEntity<Object> getPaymentsByCustomer(@PathVariable String customerId, @RequestHeader("Authorization") String authHeader) {
+    @GetMapping("/customer/{customerName}/")
+    public ResponseEntity<Object> getPaymentsByCustomer(@PathVariable String customerName, @RequestHeader("Authorization") String authHeader) {
         if (!isAuthorizedAsCashierOrAdmin(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid or missing token"));
         }
 
-        List<Payment> payments = paymentService.findByCustomerId(customerId);
+        List<Payment> payments = paymentService.findByCustomerName(customerName);
         return ResponseEntity.ok(payments);
     }
 

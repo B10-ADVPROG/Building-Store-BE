@@ -8,19 +8,17 @@ class PaymentTest {
     @Test
     void testCreatePayment() {
         Payment payment = new Payment.Builder()
-                .customerId("customer-123")
+                .customerName("John Doe")
                 .amount(100000)
                 .paymentMethod("CASH")
                 .status("LUNAS")
-                .transactionId("trans-123")
                 .build();
 
         assertNotNull(payment.getPaymentId());
-        assertEquals("customer-123", payment.getCustomerId());
+        assertEquals("John Doe", payment.getCustomerName());
         assertEquals(100000, payment.getAmount());
         assertEquals("CASH", payment.getPaymentMethod());
         assertEquals("LUNAS", payment.getStatus());
-        assertEquals("trans-123", payment.getTransactionId());
     }
 
     @Test
@@ -39,10 +37,10 @@ class PaymentTest {
     }
 
     @Test
-    void testSetNullCustomerId() {
+    void testSetNullCustomerName() {
         Payment payment = new Payment();
         assertThrows(IllegalArgumentException.class, () -> {
-            payment.setCustomerId(null);
+            payment.setCustomerName(null);
         });
     }
 }
