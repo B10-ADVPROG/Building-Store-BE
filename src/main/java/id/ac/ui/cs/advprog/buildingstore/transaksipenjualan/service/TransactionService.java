@@ -2,12 +2,15 @@ package id.ac.ui.cs.advprog.buildingstore.transaksipenjualan.service;
 
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model.Product;
 import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.service.ProductService;
+import id.ac.ui.cs.advprog.buildingstore.transaksipenjualan.dto.CreateTransactionRequest;
 import id.ac.ui.cs.advprog.buildingstore.transaksipenjualan.model.SalesTransaction;
 import id.ac.ui.cs.advprog.buildingstore.transaksipenjualan.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TransactionService {
@@ -21,6 +24,24 @@ public class TransactionService {
         this.productService = productService;
     }
 
+    public SalesTransaction createRequest(CreateTransactionRequest request) {
+        Map<Product, Integer> productMap = new HashMap<>();
+
+        for (Map.Entry<String, Integer> entry : request.getProducts().entrySet()) {
+            String productId = entry.getKey();
+            Integer quantity = entry.getValue();
+
+            Product product = productService.findById(productId);
+
+            productMap.put(product, quantity);
+        }
+
+        SalesTransaction transaction = new SalesTransaction();
+        transaction.setProducts(productMap);
+
+        return create(transaction);
+    }
+
     public SalesTransaction create(SalesTransaction transaction) {
         transaction.getProducts().forEach((product, quantity) -> {
             productService.reduceStock(product, (int) quantity);
@@ -28,6 +49,7 @@ public class TransactionService {
 
         return transactionRepository.save(transaction);
     }
+
 
     public List<SalesTransaction> findAll() {
         return transactionRepository.findAll();
