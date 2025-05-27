@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EditProductDTO {
-    private String newProductName;
-    private String newProductDescription;
-    private Integer newProductPrice;
-    private Integer newProductStock;
+    private String productName;
+    private String productDescription;
+    private Integer productPrice;
+    private Integer productStock;
 }

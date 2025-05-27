@@ -4,9 +4,11 @@ import id.ac.ui.cs.advprog.buildingstore.manajemenproduk.model.Product;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ActiveProfiles("test")
 public class ProductTest {
     private Product product;
 
