@@ -34,4 +34,17 @@ public class TransactionController {
 
         return ResponseEntity.ok(Map.of("message", "Transaction is created successfully"));
     }
+
+    @GetMapping("/")
+    public ResponseEntity<?> getAllTransactions(
+            @RequestHeader(name = "Authorization", required = false) String authorization) {
+
+        if (authorization == null || !authorization.equals("Bearer Token")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid or missing token"));
+        }
+
+        return ResponseEntity.ok(transactionService.findAll());
+    }
+
 }
