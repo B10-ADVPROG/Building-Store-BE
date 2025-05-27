@@ -70,5 +70,25 @@ public class TransactionController {
         }
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteTransaction(
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @PathVariable String id) {
+
+        if (authorization == null || !authorization.equals("Bearer Token")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid or missing token"));
+        }
+
+        try {
+            transactionService.deleteById(id);
+            return ResponseEntity.ok(Map.of("message", "Transaction deleted successfully"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+
 
 }
