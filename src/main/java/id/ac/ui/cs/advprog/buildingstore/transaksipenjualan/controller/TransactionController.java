@@ -47,4 +47,28 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.findAll());
     }
 
+    @PostMapping("/update/{id}")
+    public ResponseEntity<?> updateTransactionStatus(
+            @RequestHeader(name = "Authorization", required = false) String authorization,
+            @PathVariable String id) {
+
+        if (authorization == null || !authorization.equals("Bearer Token")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Invalid or missing token"));
+        }
+
+        try {
+            transactionService.update(id);
+            return ResponseEntity.ok(Map.of("message", "Transaction status updated successfully"));
+        } catch (IllegalArgumentException ex) {
+            String msg = ex.getMessage();
+            if (msg.contains("not found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", msg));
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", msg));
+            }
+        }
+    }
+
+
 }
