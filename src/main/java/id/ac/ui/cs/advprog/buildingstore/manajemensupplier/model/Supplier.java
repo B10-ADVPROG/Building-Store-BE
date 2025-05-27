@@ -13,9 +13,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "suppliers")
 public class Supplier {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -33,5 +34,13 @@ public class Supplier {
     @Column(nullable = false)
     private String address;
 
-    private boolean active;
+    @Builder.Default
+    private boolean active = true;
+
+    @PrePersist
+    protected void onCreate() {
+        if (id == null) {
+            id = UUID.randomUUID();
+        }
+    }
 }
