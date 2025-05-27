@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(TransactionController.class)
@@ -52,7 +52,7 @@ public class UpdateTransactionTest {
 
     @Test
     public void testUpdateTransactionSuccess() throws Exception {
-        mockMvc.perform(post("/transaction/update/" + existingId)
+        mockMvc.perform(put("/transaction/update/" + existingId)
                         .header("Authorization", validToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -61,7 +61,7 @@ public class UpdateTransactionTest {
 
     @Test
     public void testUpdateTransactionNotFound() throws Exception {
-        mockMvc.perform(post("/transaction/update/" + nonExistingId)
+        mockMvc.perform(put("/transaction/update/" + nonExistingId)
                         .header("Authorization", validToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -70,7 +70,7 @@ public class UpdateTransactionTest {
 
     @Test
     public void testUpdateTransactionWrongStatus() throws Exception {
-        mockMvc.perform(post("/transaction/update/" + wrongStatusId)
+        mockMvc.perform(put("/transaction/update/" + wrongStatusId)
                         .header("Authorization", validToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())

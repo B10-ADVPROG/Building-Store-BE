@@ -47,7 +47,7 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.findAll());
     }
 
-    @PostMapping("/update/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> updateTransactionStatus(
             @RequestHeader(name = "Authorization", required = false) String authorization,
             @PathVariable String id) {
